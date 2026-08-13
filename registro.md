@@ -52,3 +52,30 @@ Crear la herramienta PromptBlueprint (diseño de frontend que se exporta como JS
   - Release "PromptBlueprint v1.0.0" con el asset `PromptBlueprint.html`:
     https://github.com/irvinMartinez2709/PromptBlueprint/releases/tag/v1.0.0
 - Versionado semver acordado: 1.x.0 = cambios grandes; 1.x.x = arreglos pequeños. Cada versión se sube a GitHub.
+
+---
+
+### 3
+
+2026-08-13 16:40
+
+Versión 1.1.0 — Cambios grandes solicitados por el usuario:
+
+1. No tiene que ser todo un solo HTML → reestructuré el proyecto en varios archivos: `index.html`, `css/app.css`, `js/i18n.js`, `js/tipos.js`, `js/app.js`. Eliminé el antiguo `PromptBlueprint.html`.
+2. Sliders (scrollbars) en los paneles; secciones de la paleta expandidas por defecto con botón para expandir/colapsar cada una (antes se compactaban y no se veían los elementos).
+3. Zoom in/out en el lienzo (botones − / +, porcentaje y "ajustar zoom" para que quepa).
+4. Guardar/cargar proyectos (archivo .json que restaura pestañas, elementos, colores e idioma).
+5. Sistema de barra de pestañas: múltiples lienzos/secciones editables; los botones/enlaces pueden tener "Destino de navegación" para llevar a otra sección (doble clic en el lienzo navega a la pestaña destino).
+6. Panel de ajustes (⚙) para cambiar los colores de la interfaz (fondo, paneles, bordes, texto, acento) en vivo.
+7. Sección "Acerca de" en ajustes: "Versión: 1.1.0", "Desarrollado por: Irisny", "Plataforma: Web".
+8. Ajustes permite cambiar la herramienta entre español e inglés (toda la interfaz, elementos, FAQ y "Acerca de" se traducen).
+9. El panel de propiedades (clic derecho) ahora se abre a la izquierda de la PANTALLA (position fixed), no junto a la paleta.
+10. El JSON exportado incluye una sección `instrucciones_para_la_ia` que explica a la IA cómo usar el JSON (mencionado también en el FAQ). El JSON ahora exporta todas las "paginas" (pestañas).
+
+[Qué hice yo (Opencode)]
+- Cargué skills `registro`; planifiqué tareas y actualicé versión a 1.1.0.
+- Creé los archivos: index.html, css/app.css, js/i18n.js (traducciones ES/EN), js/tipos.js (registro de tipos con etiquetas es/en) y js/app.js (toda la lógica). Borré el viejo PromptBlueprint.html.
+- Corregí bugs durante la verificación: colisión de nombres (`const t` local que pisaba la función global de traducción `t()` en chip() y construirDOM()), y título del botón de zoom "−" con carácter Unicode que rompía la selección en el test.
+- Verifiqué con Playwright (`pwtest\pb11-test.cjs`): 37/37 checks PASS, sin errores JS.
+- Actualicé README.md para v1.1.0.
+- Publicar en GitHub: commit, tag `v1.1.0`, push y Release con los archivos (pendiente de ejecutar).

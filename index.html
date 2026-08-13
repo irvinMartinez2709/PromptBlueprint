@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptBlueprint v1.1.0</title>
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+    <!-- ===== BARRA SUPERIOR ===== -->
+    <div id="barra">
+        <div class="titulo">Prompt<span>Blueprint</span> <span class="ver">v1.1.0</span></div>
+
+        <button class="btn" id="btn-panel" onclick="togglePanel()" data-i18n="panel"></button>
+
+        <div class="sep"></div>
+        <button class="btn" id="btn-modo" onclick="toggleModo()"></button>
+        <button class="btn verde" onclick="autoAcomodar()" data-i18n="autoAcomodar"></button>
+
+        <div class="sep"></div>
+        <label data-i18n="zoomTxt"></label>
+        <button class="btn ico" onclick="zoomPorcentaje(-0.1)" title="-">−</button>
+        <span id="zoom-porc">100%</span>
+        <button class="btn ico" onclick="zoomPorcentaje(0.1)" title="+">+</button>
+        <button class="btn ico" onclick="zoomAjustar()" title="Fit">⤢</button>
+
+        <div class="sep"></div>
+        <label data-i18n="lienzoTxt"></label>
+        <input type="number" id="ent-ancho" value="1280" min="200" max="4000" onchange="aplicarTamanoLienzo()" title="Width">
+        <span style="color:var(--texto-suave);">×</span>
+        <input type="number" id="ent-alto" value="720" min="150" max="3000" onchange="aplicarTamanoLienzo()" title="Height">
+        <select id="sel-preset" onchange="aplicarPreset()">
+            <option value="" data-i18n="presets"></option>
+            <option value="1280,720" data-i18n="presetEscritorio"></option>
+            <option value="1440,900" data-i18n="presetEscritorioGrande"></option>
+            <option value="768,1024" data-i18n="presetTablet"></option>
+            <option value="390,844" data-i18n="presetMovil"></option>
+            <option value="375,667" data-i18n="presetMovilPequeno"></option>
+        </select>
+        <label data-i18n="fondo"></label>
+        <input type="color" id="ent-fondo" value="#ffffff" onchange="aplicarFondo()">
+
+        <div class="sep"></div>
+        <button class="btn verde" onclick="exportar()" data-i18n="exportarJSON"></button>
+        <button class="btn" onclick="guardarProyecto()" data-i18n="guardarProyecto"></button>
+        <button class="btn" onclick="document.getElementById('ent-cargar').click()" data-i18n="cargarProyecto"></button>
+        <button class="btn" onclick="abrirAjustes()" data-i18n="ajustes"></button>
+    </div>
+
+    <!-- ===== BARRA DE PESTAÑAS (secciones) ===== -->
+    <div id="barra-pestanas">
+        <button id="btn-nueva-pestania" onclick="nuevaPestania()" title="+">＋</button>
+    </div>
+
+    <!-- ===== CUERPO ===== -->
+    <div id="cuerpo">
+
+        <!-- Panel izquierdo: paleta -->
+        <div id="panel">
+            <div class="panel-interior">
+                <div id="panel-cabecera">
+                    <h3 data-i18n="elementos"></h3>
+                    <input type="text" id="buscar" placeholder="" oninput="renderPaleta()">
+                    <div class="fila">
+                        <button class="btn" style="flex:1;" onclick="nuevaSeccion(false)" data-i18n="nuevaSeccion"></button>
+                        <button class="btn ico" onclick="nuevaSeccion(true)" data-i18n="subSeccion"></button>
+                    </div>
+                </div>
+                <div id="arbol"></div>
+            </div>
+        </div>
+
+        <!-- Zona de lienzo -->
+        <div id="contenedor-lienzo">
+            <div id="zoom-wrap">
+                <div id="lienzo">
+                    <div id="mango-lienzo" title="Resize"></div>
+                    <div class="mango-label" id="label-mango"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de edición (izquierda de la pantalla) -->
+    <div id="panel-editor">
+        <div id="editor-cabecera">
+            <h4 data-i18n="propiedades"></h4>
+            <span class="etiqueta-tipo" id="etiqueta-tipo"></span>
+            <button class="cerrar-editor" onclick="cerrarEditor()">✕</button>
+        </div>
+        <div id="editor-cuerpo"></div>
+        <div id="editor-acciones">
+            <button class="btn" onclick="accionEditor('subir')"></button>
+            <button class="btn" onclick="accionEditor('bajar')"></button>
+            <button class="btn" onclick="accionEditor('desanidar')"></button>
+            <button class="btn" onclick="accionEditor('duplicar')"></button>
+            <button class="btn" style="background:var(--peligro);border-color:var(--peligro);" onclick="accionEditor('eliminar')"></button>
+        </div>
+    </div>
+
+    <!-- Botón y panel FAQ -->
+    <button id="boton-faq" onclick="toggleFaq()">?</button>
+    <div id="panel-faq">
+        <div id="faq-cabecera">
+            <h4 data-i18n="faqTitulo"></h4>
+            <button class="cerrar-editor" onclick="toggleFaq()">✕</button>
+        </div>
+        <div id="faq-cuerpo"></div>
+    </div>
+
+    <!-- Modal exportar -->
+    <div class="modal-fondo" id="modal-exportar">
+        <div class="modal-caja">
+            <div id="modal-cabecera">
+                <h3 data-i18n="exportarTitulo"></h3>
+                <button class="cerrar-editor" onclick="cerrarModal()">✕</button>
+            </div>
+            <div id="modal-cuerpo">
+                <textarea id="json-salida" readonly spellcheck="false"></textarea>
+            </div>
+            <div id="modal-acciones">
+                <button class="btn" onclick="copiarJson()" data-i18n="copiar"></button>
+                <button class="btn verde" onclick="descargarJson()" data-i18n="descargar"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ajustes -->
+    <div class="modal-fondo" id="modal-ajustes">
+        <div class="modal-caja">
+            <div id="modal-cabecera">
+                <h3 data-i18n="ajustesTitulo"></h3>
+                <button class="cerrar-editor" onclick="cerrarAjustes()">✕</button>
+            </div>
+            <div id="ajustes-nav"></div>
+            <div id="ajustes-panel"></div>
+        </div>
+    </div>
+
+    <!-- Popover para añadir elementos a una sección -->
+    <div id="popover"></div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <!-- Cargar proyecto -->
+    <input type="file" id="ent-cargar" accept=".json,application/json" style="display:none" onchange="cargarProyecto(event)">
+
+    <script src="js/i18n.js"></script>
+    <script src="js/tipos.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

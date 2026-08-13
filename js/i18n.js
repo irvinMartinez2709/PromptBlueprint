@@ -1,0 +1,333 @@
+/* ============================================================
+   PROMPTBLUEPRINT — Traducciones ES / EN
+   ============================================================ */
+const I18N = {
+    es: {
+        appTitulo: 'PromptBlueprint',
+        verTitulo: 'v1.1.0',
+
+        // Barra superior
+        panel: 'Panel',
+        modoCuadricula: 'Modo cuadrícula',
+        modoLibre: 'Modo libre',
+        autoAcomodar: 'Auto-acomodar',
+        lienzoTxt: 'Lienzo',
+        presets: 'Presets…',
+        presetEscritorio: 'Escritorio (1280×720)',
+        presetEscritorioGrande: 'Escritorio grande (1440×900)',
+        presetTablet: 'Tablet (768×1024)',
+        presetMovil: 'Móvil (390×844)',
+        presetMovilPequeno: 'Móvil pequeño (375×667)',
+        fondo: 'Fondo',
+        exportarJSON: 'Exportar JSON',
+        guardarProyecto: 'Guardar proyecto',
+        cargarProyecto: 'Cargar proyecto',
+        ajustes: 'Ajustes',
+        zoomTxt: 'Zoom',
+        ajustarZoom: 'Ajustar zoom al lienzo',
+        nuevaPestaniaTxt: 'Nueva sección',
+
+        // Panel de elementos
+        elementos: 'ELEMENTOS',
+        buscar: 'Buscar elementos…',
+        nuevaSeccion: 'Nueva sección',
+        subSeccion: 'Sub',
+        sinResultados: 'Sin resultados para «{q}».',
+        creaSeccion: 'Crea una sección para empezar.',
+        seccionVacia: 'Sección vacía',
+        subseccionVacia: 'Subsección vacía',
+        resultados: 'Resultados',
+
+        // Acciones de sección
+        aAddElemento: 'Añadir elemento',
+        aAddSub: 'Añadir subsección',
+        aRenombrar: 'Renombrar',
+        aSubir: 'Subir (intercambiar arriba)',
+        aBajar: 'Bajar',
+        aEliminar: 'Eliminar sección',
+        aExpandir: 'Expandir',
+        aColapsar: 'Colapsar',
+        arrastraParaAñadir: 'Arrastra al lienzo o haz clic para añadirlo',
+        sueltaAqui: 'Suelta elementos aquí',
+
+        // Diálogos
+        pNombreSeccion: 'Nombre de la sección:',
+        pNombreSubseccion: 'Nombre de la subsección:',
+        pNuevoNombre: 'Nuevo nombre:',
+        pConfirmarEliminarSeccion: '¿Eliminar la sección «{s}»?',
+        pNombrePestania: 'Nombre de la nueva sección:',
+        pRenombrarPestania: 'Nuevo nombre de la sección:',
+        pConfirmarCerrarPestania: '¿Cerrar la sección «{s}»? Los elementos de esta sección se eliminarán.',
+        pNuevaPestania: 'Nueva sección',
+
+        // Editor de propiedades
+        propiedades: 'Propiedades',
+        sinSeleccion: 'Sin selección',
+        editarInstruccion: 'Haz clic derecho sobre un elemento del lienzo para editarlo.',
+        eNombre: 'Nombre',
+        eContenido: 'Contenido',
+        eColorTexto: 'Color del texto',
+        eColorFondo: 'Color de fondo',
+        eColorBorde: 'Color del borde',
+        eBorde: 'Grosor del borde',
+        eRadio: 'Esquinas (radio)',
+        ePadding: 'Relleno interior',
+        eFuente: 'Tamaño de fuente',
+        eAlineacion: 'Alineación',
+        eOpacidad: 'Opacidad',
+        eSombra: 'Sombra',
+        eAnimacion: 'Animación',
+        eNegrita: 'Negrita',
+        eAncho: 'Ancho (px)',
+        eAlto: 'Alto (px)',
+        eColumnas: 'Columnas que ocupa',
+        eFilas: 'Filas que ocupa',
+        eDestino: 'Destino de navegación',
+        eDestinoNinguna: 'Ninguna',
+        eDestinoNota: 'El elemento llevará a esta sección al pulsarlo.',
+        eSubir: '▲ Subir',
+        eBajar: '▼ Bajar',
+        eDesanidar: '↩ Desanidar',
+        eDuplicar: '⧉ Duplicar',
+        eEliminar: '✕ Eliminar',
+        alIzq: 'Izquierda',
+        alCentro: 'Centro',
+        alDer: 'Derecha',
+        alJust: 'Justificado',
+        somNinguna: 'Sin sombra',
+        somSuave: 'Sombra suave',
+        somFuerte: 'Sombra fuerte',
+        anNinguna: 'Sin animación',
+        anFade: 'Fade (aparecer)',
+        anPulse: 'Pulso',
+        anSpin: 'Girar',
+        anBounce: 'Rebote',
+        anSlide: 'Deslizar',
+        anCarga: 'Brillo de carga',
+        contenedora: 'Sección contenedora: {p}',
+        tipoElemento: 'Tipo',
+
+        // Pestañas
+        pestaniaInicio: 'Inicio',
+
+        // Exportar
+        exportarTitulo: 'JSON para tu IA',
+        copiar: 'Copiar',
+        descargar: 'Descargar .json',
+        copiado: '¡Copiado al portapapeles!',
+
+        // Guardar / cargar
+        guardado: 'Proyecto guardado correctamente.',
+        cargadoError: 'No se pudo cargar el proyecto: el archivo no es válido.',
+
+        // Ajustes
+        ajustesTitulo: 'Ajustes',
+        aApariencia: 'Apariencia',
+        aIdioma: 'Idioma',
+        aAcercaDe: 'Acerca de',
+        aColores: 'Colores de la interfaz',
+        aFondo: 'Color de fondo',
+        aPanel: 'Color de panel',
+        aPanel2: 'Color de panel secundario',
+        aBorde: 'Color de borde',
+        aTexto: 'Color de texto',
+        aTextoS: 'Color de texto suave',
+        aAcento: 'Color de acento',
+        aIdiomaLabel: 'Idioma de la herramienta',
+        aEspanol: 'Español',
+        aIngles: 'Inglés',
+        aVersion: 'Versión: {v}',
+        aDesarrollado: 'Desarrollado por: Irisny',
+        aPlataforma: 'Plataforma: Web',
+        aRestablecer: 'Restablecer colores',
+        aNotaColores: 'Los colores se aplican al instante a toda la interfaz.',
+
+        // FAQ
+        faqTitulo: 'Ayuda de PromptBlueprint',
+        faq: [
+            ['¿Cómo añado elementos al lienzo?', 'Arrastra un elemento desde la paleta izquierda, o haz clic sobre él. En el modo cuadrícula se colocará en la siguiente celda libre; en modo libre, donde lo sueltes.'],
+            ['¿Cómo creo subsecciones (menús con submenús)?', 'En la paleta usa el botón "⇩ Sub" de una sección para crear una subsección anidada (Menú → Submenú → Sub-submenú). En el lienzo, arrastra un elemento encima de un contenedor (Menú, Tarjeta, Sección…) para anidarlo dentro.'],
+            ['¿Cómo trabajo con varias secciones/páginas?', 'Usa la barra de pestañas bajo la barra superior: pulsa "+" para crear una sección nueva (otro lienzo). Con un botón o enlace puedes definir un "Destino de navegación" en sus propiedades para que lleve a otra sección.'],
+            ['¿Cómo guardo mi proyecto para seguirlo después?', 'Pulsa "Guardar proyecto" (💾) para descargar un archivo .json con todo tu trabajo (pestañas, elementos, colores e idioma). Para continuar, pulsa "Cargar proyecto" (📂) y elige ese archivo.'],
+            ['¿Cómo hago zoom sobre el lienzo?', 'Usa los botones − y + de la barra superior, o el porcentaje de zoom. También puedes ajustar el zoom para que el lienzo quepa en la pantalla.'],
+            ['¿Cómo cambio el tamaño del lienzo?', 'Arrastra la esquina inferior derecha del lienzo, o edita los campos de ancho y alto en la barra superior. También hay tamaños predefinidos en "Presets…" (Escritorio, Tablet, Móvil).'],
+            ['¿Qué diferencia hay entre modo cuadrícula y modo libre?', 'El modo cuadrícula acomoda los elementos en una cuadrícula de 12 columnas (ideal para estructuras ordenadas). El modo libre permite posicionarlos en coordenadas exactas.'],
+            ['¿Cómo edito un elemento?', 'Haz clic derecho sobre el elemento y se abrirá a la izquierda de la pantalla un panel con sus propiedades: texto, colores, bordes, esquinas, relleno, fuente, animación, opacidad, sombra y tamaño.'],
+            ['¿Qué elementos tienen animaciones?', 'Varios elementos de la sección "Animaciones" vienen animados (fade, pulso, giro, rebote, deslizar, brillo de carga). Además, cualquier elemento puede llevar animación desde el panel de propiedades.'],
+            ['¿Qué incluye el JSON que exporto?', 'El JSON incluye una sección "instrucciones_para_la_ia" que le explica a la IA cómo interpretar el documento (lienzo, modo, posición, estilos, subsecciones y destinos de navegación) para construir la web.'],
+            ['¿Puedo cambiar los colores de la interfaz y el idioma?', 'Sí, abre Ajustes (⚙): ahí puedes cambiar los colores de la interfaz, alternar entre español e inglés y ver la sección "Acerca de".'],
+            ['¿Puedo ocultar la paleta de elementos?', 'Sí, usa el botón "Panel" de la barra superior para mostrarla u ocultarla y ganar espacio para el lienzo.']
+        ]
+    },
+
+    en: {
+        appTitulo: 'PromptBlueprint',
+        verTitulo: 'v1.1.0',
+
+        // Top bar
+        panel: 'Panel',
+        modoCuadricula: 'Grid mode',
+        modoLibre: 'Free mode',
+        autoAcomodar: 'Auto-arrange',
+        lienzoTxt: 'Canvas',
+        presets: 'Presets…',
+        presetEscritorio: 'Desktop (1280×720)',
+        presetEscritorioGrande: 'Large desktop (1440×900)',
+        presetTablet: 'Tablet (768×1024)',
+        presetMovil: 'Mobile (390×844)',
+        presetMovilPequeno: 'Small mobile (375×667)',
+        fondo: 'Background',
+        exportarJSON: 'Export JSON',
+        guardarProyecto: 'Save project',
+        cargarProyecto: 'Load project',
+        ajustes: 'Settings',
+        zoomTxt: 'Zoom',
+        ajustarZoom: 'Fit canvas zoom',
+        nuevaPestaniaTxt: 'New section',
+
+        // Elements panel
+        elementos: 'ELEMENTS',
+        buscar: 'Search elements…',
+        nuevaSeccion: 'New section',
+        subSeccion: 'Sub',
+        sinResultados: 'No results for "{q}".',
+        creaSeccion: 'Create a section to start.',
+        seccionVacia: 'Empty section',
+        subseccionVacia: 'Empty subsection',
+        resultados: 'Results',
+
+        // Section actions
+        aAddElemento: 'Add element',
+        aAddSub: 'Add subsection',
+        aRenombrar: 'Rename',
+        aSubir: 'Move up (swap above)',
+        aBajar: 'Move down',
+        aEliminar: 'Delete section',
+        aExpandir: 'Expand',
+        aColapsar: 'Collapse',
+        arrastraParaAñadir: 'Drag to the canvas or click to add',
+        sueltaAqui: 'Drop elements here',
+
+        // Dialogs
+        pNombreSeccion: 'Section name:',
+        pNombreSubseccion: 'Subsection name:',
+        pNuevoNombre: 'New name:',
+        pConfirmarEliminarSeccion: 'Delete section "{s}"?',
+        pNombrePestania: 'Name for the new section:',
+        pRenombrarPestania: 'New section name:',
+        pConfirmarCerrarPestania: 'Close section "{s}"? Elements in this section will be deleted.',
+        pNuevaPestania: 'New section',
+
+        // Properties editor
+        propiedades: 'Properties',
+        sinSeleccion: 'No selection',
+        editarInstruccion: 'Right-click an element on the canvas to edit it.',
+        eNombre: 'Name',
+        eContenido: 'Content',
+        eColorTexto: 'Text color',
+        eColorFondo: 'Background color',
+        eColorBorde: 'Border color',
+        eBorde: 'Border width',
+        eRadio: 'Corners (radius)',
+        ePadding: 'Inner padding',
+        eFuente: 'Font size',
+        eAlineacion: 'Alignment',
+        eOpacidad: 'Opacity',
+        eSombra: 'Shadow',
+        eAnimacion: 'Animation',
+        eNegrita: 'Bold',
+        eAncho: 'Width (px)',
+        eAlto: 'Height (px)',
+        eColumnas: 'Columns spanned',
+        eFilas: 'Rows spanned',
+        eDestino: 'Navigation target',
+        eDestinoNinguna: 'None',
+        eDestinoNota: 'The element will go to this section when clicked.',
+        eSubir: '▲ Up',
+        eBajar: '▼ Down',
+        eDesanidar: '↩ Unnest',
+        eDuplicar: '⧉ Duplicate',
+        eEliminar: '✕ Delete',
+        alIzq: 'Left',
+        alCentro: 'Center',
+        alDer: 'Right',
+        alJust: 'Justified',
+        somNinguna: 'No shadow',
+        somSuave: 'Soft shadow',
+        somFuerte: 'Strong shadow',
+        anNinguna: 'No animation',
+        anFade: 'Fade (appear)',
+        anPulse: 'Pulse',
+        anSpin: 'Spin',
+        anBounce: 'Bounce',
+        anSlide: 'Slide',
+        anCarga: 'Loading shimmer',
+        contenedora: 'Container section: {p}',
+        tipoElemento: 'Type',
+
+        // Tabs
+        pestaniaInicio: 'Home',
+
+        // Export
+        exportarTitulo: 'JSON for your AI',
+        copiar: 'Copy',
+        descargar: 'Download .json',
+        copiado: 'Copied to clipboard!',
+
+        // Save / load
+        guardado: 'Project saved successfully.',
+        cargadoError: 'Could not load the project: the file is not valid.',
+
+        // Settings
+        ajustesTitulo: 'Settings',
+        aApariencia: 'Appearance',
+        aIdioma: 'Language',
+        aAcercaDe: 'About',
+        aColores: 'Interface colors',
+        aFondo: 'Background color',
+        aPanel: 'Panel color',
+        aPanel2: 'Secondary panel color',
+        aBorde: 'Border color',
+        aTexto: 'Text color',
+        aTextoS: 'Muted text color',
+        aAcento: 'Accent color',
+        aIdiomaLabel: 'Tool language',
+        aEspanol: 'Spanish',
+        aIngles: 'English',
+        aVersion: 'Version: {v}',
+        aDesarrollado: 'Developed by: Irisny',
+        aPlataforma: 'Platform: Web',
+        aRestablecer: 'Reset colors',
+        aNotaColores: 'Colors apply instantly to the whole interface.',
+
+        // FAQ
+        faqTitulo: 'PromptBlueprint Help',
+        faq: [
+            ['How do I add elements to the canvas?', 'Drag an element from the left palette, or click on it. In grid mode it goes to the next free cell; in free mode, wherever you drop it.'],
+            ['How do I create subsections (menus with submenus)?', 'In the palette use the "⇩ Sub" button on a section to create a nested subsection (Menu → Submenu → Sub-submenu). On the canvas, drag an element over a container (Menu, Card, Section…) to nest it inside.'],
+            ['How do I work with multiple sections/pages?', 'Use the tab bar under the top bar: press "+" to create a new section (another canvas). With a button or link you can set a "Navigation target" in its properties so it leads to another section.'],
+            ['How do I save my project to keep working later?', 'Press "Save project" (💾) to download a .json file with all your work (tabs, elements, colors and language). To continue, press "Load project" (📂) and choose that file.'],
+            ['How do I zoom in and out of the canvas?', 'Use the − and + buttons on the top bar, or the zoom percentage. You can also fit the canvas to your screen.'],
+            ['How do I change the canvas size?', 'Drag the bottom-right corner of the canvas, or edit the width and height fields on the top bar. There are also presets (Desktop, Tablet, Mobile).'],
+            ['What is the difference between grid and free mode?', 'Grid mode arranges elements on a 12-column grid (great for ordered layouts). Free mode lets you place them at exact coordinates.'],
+            ['How do I edit an element?', 'Right-click the element and a panel opens on the left side of the screen with its properties: text, colors, borders, corners, padding, font, animation, opacity, shadow and size.'],
+            ['Which elements have animations?', 'Several elements in the "Animations" section come animated (fade, pulse, spin, bounce, slide, loading shimmer). Any element can also have an animation from the properties panel.'],
+            ['What does the JSON I export include?', 'The JSON includes an "instrucciones_para_la_ia" section that tells the AI how to interpret the document (canvas, mode, position, styles, subsections and navigation targets) to build the website.'],
+            ['Can I change the interface colors and language?', 'Yes, open Settings (⚙): there you can change the interface colors, switch between Spanish and English, and see the "About" section.'],
+            ['Can I hide the elements palette?', 'Yes, use the "Panel" button on the top bar to show or hide it and gain space for the canvas.']
+        ]
+    }
+};
+
+let idioma = 'es';
+
+function t(key) {
+    const tabla = I18N[idioma] || I18N.es;
+    return tabla[key] != null ? tabla[key] : (I18N.es[key] != null ? I18N.es[key] : key);
+}
+
+function tFmt(key, params) {
+    let s = t(key);
+    for (const k in params) s = s.replace('{' + k + '}', params[k]);
+    return s;
+}
