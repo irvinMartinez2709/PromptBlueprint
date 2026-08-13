@@ -116,4 +116,7 @@ Versión 1.2.0 — 15 cambios solicitados por el usuario:
 - Añadí controles de ventana en index.html (editor, FAQ, modales) y CSS asociado.
 - Verifiqué con Playwright (`pwtest\pb12-test.cjs`): 40/40 checks PASS, sin errores JS.
 - Actualicé README.md para v1.2.0.
-- Publicar en GitHub: commit, tag `v1.2.0`, push y Release (pendiente de ejecutar).
+- Publicado en GitHub:
+  - Commit `b39c751` "feat: PromptBlueprint v1.2.0…" + tag `v1.2.0` y push a main.
+  - Release "PromptBlueprint v1.2.0" con el asset `PromptBlueprint-v1.2.0.zip`:
+    https://github.com/irvinMartinez2709/PromptBlueprint/releases/tag/v1.2.0
