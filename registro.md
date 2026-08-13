@@ -153,5 +153,9 @@ Versión 1.3.0 — 14 cambios solicitados por el usuario:
 - `git mv index.html PromptBlueprint.html`.
 - Verifiqué con Playwright (`pwtest\pb13-test.cjs`): 40/40 checks PASS (los 14 requisitos), sin errores JS.
 - Actualicé README.md para v1.3.0.
+- Publicado en GitHub:
+  - Commit `470eccd` "feat: PromptBlueprint v1.3.0…" + tag `v1.3.0` y push a main.
+  - Release "PromptBlueprint v1.3.0" con el asset `PromptBlueprint-v1.3.0.zip` (PromptBlueprint.html + logo.ico + css/ + js/ + README):
+    https://github.com/irvinMartinez2709/PromptBlueprint/releases/tag/v1.3.0
 
 ---
