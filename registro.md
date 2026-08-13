@@ -78,4 +78,7 @@ Versión 1.1.0 — Cambios grandes solicitados por el usuario:
 - Corregí bugs durante la verificación: colisión de nombres (`const t` local que pisaba la función global de traducción `t()` en chip() y construirDOM()), y título del botón de zoom "−" con carácter Unicode que rompía la selección en el test.
 - Verifiqué con Playwright (`pwtest\pb11-test.cjs`): 37/37 checks PASS, sin errores JS.
 - Actualicé README.md para v1.1.0.
-- Publicar en GitHub: commit, tag `v1.1.0`, push y Release con los archivos (pendiente de ejecutar).
+- Publicado en GitHub:
+  - Commit `791cbd8` "feat: PromptBlueprint v1.1.0…" + tag `v1.1.0` y push a main.
+  - Release "PromptBlueprint v1.1.0" con el asset `PromptBlueprint-v1.1.0.zip` (index.html + css/ + js/ + README):
+    https://github.com/irvinMartinez2709/PromptBlueprint/releases/tag/v1.1.0
