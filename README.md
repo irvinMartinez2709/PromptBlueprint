@@ -2,11 +2,11 @@
 
 Diseña interfaces web arrastrando elementos a un lienzo y exporta el diseño como **JSON** para pasárselo a una IA y que construya la web.
 
-Herramienta local: abre `index.html` en cualquier navegador moderno. No requiere instalación ni dependencias.
+Herramienta local: abre `PromptBlueprint.html` en cualquier navegador moderno. No requiere instalación ni dependencias.
 
 ## Versión actual
 
-**v1.2.0**
+**v1.3.0**
 
 ## Características
 
@@ -22,11 +22,17 @@ Herramienta local: abre `index.html` en cualquier navegador moderno. No requiere
 - **Guardar / cargar proyectos**: guarda todo tu trabajo (pestañas, elementos, colores e idioma) en un archivo .json y continúa después. Además hay **autoguardado** en el navegador: si recargas la página se conserva lo hecho. El botón **"Limpiar lienzo"** borra todo y empieza de cero.
 - **Buscador** para encontrar elementos al instante (ignora tildes).
 - **Panel ocultable**: muestra u oculta la paleta para ganar espacio.
+- **Deshacer / rehacer**: botones ↶ y ↷ en la barra superior para deshacer o rehacer los cambios sobre el lienzo (añadir, mover, redimensionar, duplicar, eliminar, pestañas, colores…).
+- **Nombres únicos automáticos**: si añades dos elementos del mismo tipo, el segundo se nombra con sufijo `-1`, `-2`, etc. (ej. Botón, Botón-1, Botón-2).
+- **Presets propios**: en Ajustes → Apariencia puedes guardar la combinación de colores actual como preset personalizado y eliminarlo cuando quieras.
+- **Color de la cuadrícula**: el color de las líneas de la cuadrícula del lienzo es configurable desde Ajustes.
+- **Zoom manual**: el porcentaje de zoom es un campo editable (25%–300%), además de los botones − y +.
 - **Elementos con animaciones** (fade, pulso, giro, rebote, deslizar, brillo de carga) aplicables a cualquier elemento.
-- **Editor de propiedades**: clic derecho sobre un elemento abre, saliendo desde la izquierda de la pantalla, un panel para editar texto, colores (con opción de **"sin color"** o transparente), bordes, esquinas, relleno, fuente, opacidad, sombra, animación, tamaño y destino de navegación. Si eliminas un elemento, el panel se cierra solo.
-- **Panel de ajustes**: modo **claro/oscuro**, **presets de color** para toda la interfaz, colores personalizados al instante, **columnas de cuadrícula**, alterna entre **español e inglés**, incluye las **preguntas frecuentes** y la sección "Acerca de" (versión, desarrollador y plataforma).
+- **Editor de propiedades**: clic derecho sobre un elemento abre, saliendo desde la izquierda de la pantalla (sin tapar la paleta), un panel para editar texto, colores (con opción de **"sin color"** o transparente), bordes, esquinas, relleno, fuente, opacidad, sombra, animación, tamaño y destino de navegación. Si eliminas un elemento, el panel se cierra solo.
+- **Panel de ajustes**: modo **claro/oscuro**, **presets de color** (incluidos los tuyos), colores personalizados al instante, **columnas de cuadrícula** (hasta 50), **color de la cuadrícula**, alterna entre **español e inglés**, incluye las **preguntas frecuentes** y la sección "Acerca de" (versión, desarrollador y plataforma).
 - **Diálogos propios**: las confirmaciones y entradas de texto usan ventanas emergentes propias de la herramienta (no las del navegador).
-- **Controles de ventana**: los paneles y ventanas que se pueden cerrar tienen sus botones de control (minimizar/cerrar) como en Windows o macOS.
+- **Controles de ventana**: los paneles y ventanas que se pueden cerrar tienen su botón de cierre cuadrado y discreto (se enciende en rojo al pasar el ratón).
+- **Cambio de modo sin mover elementos**: alternar entre modo cuadrícula y modo libre **mantiene cada elemento en su lugar**; solo "Auto-acomodar" o mover a mano los recolocan.
 - **Botón "?"**: panel de preguntas y respuestas sobre la herramienta (también disponible en Ajustes → Ayuda).
 - **Exportar JSON para la IA**: incluye la sección `instrucciones_para_la_ia` para que la IA sepa interpretar el documento (lienzo, modo, columnas, posición, estilos, subsecciones y destinos) y construya la web.
 
@@ -34,7 +40,8 @@ Herramienta local: abre `index.html` en cualquier navegador moderno. No requiere
 
 ```
 PromptBlueprint/
-├── index.html      → entrada principal
+├── PromptBlueprint.html → entrada principal
+├── logo.ico             → icono de la herramienta
 ├── css/app.css     → estilos de la interfaz
 ├── js/i18n.js      → traducciones español/inglés
 ├── js/tipos.js     → registro de tipos de elementos
@@ -43,7 +50,7 @@ PromptBlueprint/
 
 ## Cómo usarla
 
-1. Abre `index.html` en cualquier navegador moderno.
+1. Abre `PromptBlueprint.html` en cualquier navegador moderno.
 2. Arrastra (o haz clic) los elementos de la paleta izquierda hacia el lienzo.
 3. Crea contenedores y arrastra elementos sobre ellos para formar menús con submenús.
 4. Usa la barra de pestañas para crear varias secciones/páginas.

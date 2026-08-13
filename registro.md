@@ -120,3 +120,38 @@ Versión 1.2.0 — 15 cambios solicitados por el usuario:
   - Commit `b39c751` "feat: PromptBlueprint v1.2.0…" + tag `v1.2.0` y push a main.
   - Release "PromptBlueprint v1.2.0" con el asset `PromptBlueprint-v1.2.0.zip`:
     https://github.com/irvinMartinez2709/PromptBlueprint/releases/tag/v1.2.0
+
+---
+
+### 5
+
+2026-08-13 18:05
+
+Versión 1.3.0 — 14 cambios solicitados por el usuario:
+
+1. La cabecera de Ajustes (título + controles) pasa a estar ARRIBA del nav y del panel (antes ocupaba una columna ancha a la izquierda).
+2. Las columnas de la cuadrícula se pueden configurar hasta 50 (antes máximo 24).
+3. Solo queda el botón de CERRAR (cuadrado con X blanca, rojo al pasar el ratón) en editor, FAQ y Ajustes; se eliminaron los de minimizar.
+4. Las preguntas de la FAQ ya no se ven compactadas: más espaciado y un scroll para leer todo (sin cambiar el tamaño del panel).
+5. Botones DESHACER/REHACER (↶/↷) en la barra superior para los elementos del lienzo (añadir, mover, redimensionar, duplicar, eliminar, pestañas, colores, columnas).
+6. Se pueden crear presets de color PROPIOS en Ajustes (guardar el tema actual con nombre y eliminarlo).
+7. El color de la cuadrícula del lienzo es configurable desde Ajustes.
+8. Corregidos los presets de tamaño de lienzo: había una colisión de nombres (`aplicarPreset` duplicado, la versión de color pisaba a la de tamaño).
+9. El panel de propiedades sale de la izquierda sin tapar la paleta de elementos (left: 276px, o left: 0 si la paleta está oculta).
+10. El zoom es un campo editable (25%–300%) además de los botones − / +.
+11. En modo libre el elemento se ve moviéndose MIENTRAS se arrastra (antes solo al soltar).
+12. Nombres únicos automáticos: si existe un elemento con el mismo nombre, el nuevo se llama `nombre-1`, `nombre-2`, etc.
+13. Cambiar entre modo cuadrícula ↔ libre ya NO mueve los elementos (mantienen col/fila y x/y sincronizados); solo "Auto-acomodar" o moverlos a mano los recoloca.
+14. `index.html` pasó a llamarse `PromptBlueprint.html` y se añadió el icono `logo.ico`.
+
+[Qué hice yo (Opencode)]
+- Cargué skill `registro`; planifiqué las 14 tareas y actualicé la versión a 1.3.0.
+- index.html: cabecera de Ajustes arriba (envolví nav+panel en `#ajustes-cuerpo`), quité botones minimizar (solo cerrar), añadí botones ↶/↷, campo de zoom editable e icono `logo.ico`.
+- css/app.css: `.vc` cuadrado discreto (rojo en hover), layout columnar del modal de Ajustes, FAQ con más aire y scroll (`flex-shrink:0` para que no se comprima), editor a la izquierda sin tapar paleta.
+- js/app.js: sistema de historial (snapshot/push/deshacer/rehacer, tope 80), movimiento en vivo en modo libre, sincronización doble de coordenadas (grid↔libre), `nombreUnico()`, `aplicarPresetColor` (renombrada), presets propios (localStorage), color de cuadrícula, columnas hasta 50, `zoomManual()`, y quitadas las funciones muertas `minimizar*`.
+- js/i18n.js: traducciones ES/EN nuevas (deshacer/rehacer, guardar/eliminar preset, color de cuadrícula) y versión 1.3.0.
+- `git mv index.html PromptBlueprint.html`.
+- Verifiqué con Playwright (`pwtest\pb13-test.cjs`): 40/40 checks PASS (los 14 requisitos), sin errores JS.
+- Actualicé README.md para v1.3.0.
+
+---

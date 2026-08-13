@@ -58,7 +58,7 @@ body {
 #barra select {
     background: var(--fondo); color: var(--texto); border: 1px solid var(--borde); border-radius: 5px; padding: 4px 5px; font-size: 12px; flex-shrink: 0;
 }
-#zoom-porc { min-width: 44px; text-align: center; font-size: 12px; color: var(--texto-suave); font-weight: 600; }
+#zoom-porc { width: 52px; text-align: center; font-size: 12px; color: var(--texto-suave); font-weight: 600; background: var(--fondo); border: 1px solid var(--borde); border-radius: 5px; padding: 4px 5px; flex-shrink: 0; }
 
 /* ===== Barra de pestañas ===== */
 #barra-pestanas {
@@ -197,9 +197,11 @@ body {
 /* ===== Panel de edición (izquierda de la pantalla) ===== */
 #panel-editor {
     position: fixed; left: 0; top: var(--barra-h); bottom: 0; width: 304px; background: var(--panel);
-    border-right: 2px solid var(--acento); z-index: 120; transform: translateX(-102%); transition: transform .22s ease;
+    border-right: 2px solid var(--acento); z-index: 120; transform: translateX(-102%); transition: transform .22s ease, left .22s ease;
     display: flex; flex-direction: column; box-shadow: 6px 0 20px rgba(0,0,0,.45);
 }
+#panel-editor.abierto { left: 276px; transform: translateX(0); }
+#panel-editor.sin-paleta.abierto { left: 0; }
 #panel-editor.abierto { transform: translateX(0); }
 #editor-cabecera {
     padding: 11px 12px; border-bottom: 1px solid var(--borde); display: flex; align-items: center; gap: 8px;
@@ -228,18 +230,14 @@ body {
     background: var(--panel2); flex-shrink: 0;
 }
 #editor-acciones .btn { flex: 1; min-width: 56px; text-align: center; font-size: 11.5px; }
-/* ===== Controles de ventana (minimizar / cerrar) ===== */
+/* ===== Controles de ventana (cerrar, estilo .mini) ===== */
 .ventana-controles { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .ventana-controles .vc {
-    width: 16px; height: 16px; border-radius: 50%; border: none; cursor: pointer; font-size: 9px;
-    line-height: 1; display: flex; align-items: center; justify-content: center; color: rgba(0,0,0,.65);
-    font-weight: 700; padding: 0;
+    background: none; border: none; color: var(--texto-suave); cursor: pointer; font-size: 12px;
+    width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; padding: 0; line-height: 1; flex-shrink: 0;
 }
-.ventana-controles .vc.minimizar { background: #f5b83d; }
-.ventana-controles .vc.cerrar { background: #f2504a; }
-.ventana-controles .vc:hover { filter: brightness(1.15); }
-.ventana-controles .vc.minimizar::before { content: '—'; }
-.ventana-controles .vc.cerrar::before { content: '✕'; }
+.ventana-controles .vc:hover { background: var(--peligro); color: #fff; }
 
 #editor-cabecera, #faq-cabecera, #modal-cabecera {
     display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--borde);
@@ -255,8 +253,7 @@ body {
 #panel-editor.minimizado #editor-cuerpo,
 #panel-editor.minimizado #editor-acciones,
 #panel-faq.minimizado #faq-cuerpo,
-#modal-ajustes.minimizado #ajustes-nav,
-#modal-ajustes.minimizado #ajustes-panel { display: none; }
+#modal-ajustes.minimizado #ajustes-cuerpo { display: none; }
 #panel-editor.minimizado { height: auto; }
 #panel-faq.minimizado { height: auto; }
 #modal-ajustes.minimizado .modal-caja { min-height: 0; }
@@ -319,12 +316,12 @@ body {
 #panel-faq.abierto { display: flex; }
 #faq-cabecera { padding: 11px 13px; background: var(--panel2); border-bottom: 1px solid var(--borde); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 #faq-cabecera h4 { flex: 1; font-size: 13px; }
-#faq-cuerpo { overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
-.faq-item { border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; }
-.faq-pregunta { padding: 8px 11px; cursor: pointer; font-size: 12.5px; font-weight: 600; display: flex; gap: 8px; align-items: center; }
+#faq-cuerpo { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
+.faq-item { border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+.faq-pregunta { padding: 14px 16px; cursor: pointer; font-size: 13.5px; font-weight: 600; display: flex; gap: 10px; align-items: center; line-height: 1.55; }
 .faq-pregunta:hover { background: var(--panel2); }
-.faq-pregunta .num { color: var(--acento); font-weight: 800; }
-.faq-respuesta { display: none; padding: 4px 12px 11px; font-size: 12px; color: var(--texto-suave); line-height: 1.5; border-top: 1px dashed var(--borde); margin-top: 4px; padding-top: 8px; }
+.faq-pregunta .num { color: var(--acento); font-weight: 800; flex-shrink: 0; }
+.faq-respuesta { display: none; padding: 10px 16px 15px; font-size: 13px; color: var(--texto-suave); line-height: 1.7; border-top: 1px dashed var(--borde); margin-top: 4px; padding-top: 13px; }
 .faq-item.abierto .faq-respuesta { display: block; }
 
 /* ===== Modales ===== */
@@ -347,7 +344,8 @@ body {
 #modal-acciones { padding: 11px 14px; border-top: 1px solid var(--borde); display: flex; gap: 8px; justify-content: flex-end; background: var(--panel2); flex-shrink: 0; }
 
 /* ===== Modal de ajustes ===== */
-#modal-ajustes .modal-caja { width: 620px; display: flex; flex-direction: row; min-height: 420px; }
+#modal-ajustes .modal-caja { width: 620px; display: flex; flex-direction: column; min-height: 420px; }
+#ajustes-cuerpo { display: flex; flex-direction: row; flex: 1; min-height: 0; }
 #ajustes-nav {
     width: 170px; flex-shrink: 0; border-right: 1px solid var(--borde); padding: 10px; display: flex; flex-direction: column; gap: 4px;
 }

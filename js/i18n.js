@@ -4,7 +4,7 @@
 const I18N = {
     es: {
         appTitulo: 'PromptBlueprint',
-        verTitulo: 'v1.2.0',
+        verTitulo: 'v1.3.0',
 
         // Barra superior
         panel: 'Panel',
@@ -158,6 +158,17 @@ const I18N = {
         aNotaColores: 'Los colores se aplican al instante a toda la interfaz.',
         aPresets: 'Presets de color',
         aPresetsNota: 'Aplica un conjunto de colores completo a toda la herramienta.',
+        aGuardarPreset: 'Guardar preset actual',
+        aEliminarPreset: 'Eliminar preset',
+        aNombrePreset: 'Nombre del preset',
+        aColorCuadricula: 'Color de la cuadrícula',
+        presetGuardado: 'Preset guardado',
+        deshacer: 'Deshacer',
+        rehacer: 'Rehacer',
+        sinDeshacer: 'Nada que deshacer',
+        sinRehacer: 'Nada que rehacer',
+        deshecho: 'Cambio deshecho',
+        rehecho: 'Cambio rehecho',
         aModoClaro: 'Modo claro',
         aModoOscuro: 'Modo oscuro',
         aModoApariencia: 'Modo de la interfaz',
@@ -185,7 +196,7 @@ const I18N = {
 
     en: {
         appTitulo: 'PromptBlueprint',
-        verTitulo: 'v1.2.0',
+        verTitulo: 'v1.3.0',
 
         // Top bar
         panel: 'Panel',
@@ -339,6 +350,17 @@ const I18N = {
         aNotaColores: 'Colors apply instantly to the whole interface.',
         aPresets: 'Color presets',
         aPresetsNota: 'Applies a full color set to the whole tool.',
+        aGuardarPreset: 'Save current preset',
+        aEliminarPreset: 'Delete preset',
+        aNombrePreset: 'Preset name',
+        aColorCuadricula: 'Grid color',
+        presetGuardado: 'Preset saved',
+        deshacer: 'Undo',
+        rehacer: 'Redo',
+        sinDeshacer: 'Nothing to undo',
+        sinRehacer: 'Nothing to redo',
+        deshecho: 'Change undone',
+        rehecho: 'Change redone',
         aModoClaro: 'Light mode',
         aModoOscuro: 'Dark mode',
         aModoApariencia: 'Interface mode',

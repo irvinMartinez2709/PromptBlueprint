@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptBlueprint v1.2.0</title>
+    <title>PromptBlueprint v1.3.0</title>
+    <link rel="icon" href="logo.ico">
     <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 
     <!-- ===== BARRA SUPERIOR ===== -->
     <div id="barra">
-        <div class="titulo">Prompt<span>Blueprint</span> <span class="ver">v1.2.0</span></div>
+        <div class="titulo">Prompt<span>Blueprint</span> <span class="ver">v1.3.0</span></div>
 
         <button class="btn" id="btn-panel" onclick="togglePanel()" data-i18n="panel"></button>
+
+        <div class="sep"></div>
+        <button class="btn ico" onclick="deshacer()" title="Deshacer">↶</button>
+        <button class="btn ico" onclick="rehacer()" title="Rehacer">↷</button>
 
         <div class="sep"></div>
         <button class="btn" id="btn-modo" onclick="toggleModo()"></button>
@@ -21,7 +26,7 @@
         <div class="sep"></div>
         <label data-i18n="zoomTxt"></label>
         <button class="btn ico" onclick="zoomPorcentaje(-0.1)" title="-">−</button>
-        <span id="zoom-porc">100%</span>
+        <input type="number" id="zoom-porc" value="100" min="25" max="300" step="5" onchange="zoomManual()" title="%">
         <button class="btn ico" onclick="zoomPorcentaje(0.1)" title="+">+</button>
         <button class="btn ico" onclick="zoomAjustar()" title="Fit">⤢</button>
 
@@ -87,7 +92,6 @@
     <div id="panel-editor">
         <div id="editor-cabecera">
             <div class="ventana-controles">
-                <button class="vc minimizar" onclick="minimizarEditor()" title="Minimizar">—</button>
                 <button class="vc cerrar" onclick="cerrarEditor()" title="Cerrar">✕</button>
             </div>
             <h4 data-i18n="propiedades"></h4>
@@ -108,7 +112,6 @@
     <div id="panel-faq">
         <div id="faq-cabecera">
             <div class="ventana-controles">
-                <button class="vc minimizar" onclick="minimizarFaq()" title="Minimizar">—</button>
                 <button class="vc cerrar" onclick="toggleFaq()" title="Cerrar">✕</button>
             </div>
             <h4 data-i18n="faqTitulo"></h4>
@@ -141,12 +144,13 @@
             <div id="modal-cabecera">
                 <h3 data-i18n="ajustesTitulo"></h3>
                 <div class="ventana-controles">
-                    <button class="vc minimizar" onclick="minimizarAjustes()" title="Minimizar">—</button>
                     <button class="vc cerrar" onclick="cerrarAjustes()" title="Cerrar">✕</button>
                 </div>
             </div>
-            <div id="ajustes-nav"></div>
-            <div id="ajustes-panel"></div>
+            <div id="ajustes-cuerpo">
+                <div id="ajustes-nav"></div>
+                <div id="ajustes-panel"></div>
+            </div>
         </div>
     </div>
 

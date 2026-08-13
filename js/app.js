@@ -1,10 +1,30 @@
 /* ============================================================
-   PROMPTBLUEPRINT v1.2.0 — Lógica principal
+   PROMPTBLUEPRINT v1.3.0 — Lógica principal
    ============================================================ */
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 const TEMA_OSCURO = { fondo: '#1e1e24', panel: '#2a2b36', panel2: '#353647', borde: '#3f4052', texto: '#e6e6f0', textoS: '#a5a6c4', acento: '#2563eb' };
 const TEMA_CLARO = { fondo: '#eef1f6', panel: '#ffffff', panel2: '#f3f5f9', borde: '#d4d9e3', texto: '#20242e', textoS: '#5c6474', acento: '#2563eb' };
 const TEMA_DEFECTO = TEMA_OSCURO;
+let presetsUsuarios = [];
+let colorCuadricula = '#2563eb';
+
+function guardarPresetsUsuarios() {
+    try { localStorage.setItem('pb_presets_usuarios', JSON.stringify(presetsUsuarios)); } catch (e) { /* ignorar */ }
+}
+function cargarPresetsUsuarios() {
+    try {
+        const raw = localStorage.getItem('pb_presets_usuarios');
+        if (raw) presetsUsuarios = JSON.parse(raw);
+    } catch (e) { presetsUsuarios = []; }
+}
+async function guardarPresetActual() {
+    const nombre = await dialogoPrompt(t('aNombrePreset'), '');
+    if (!nombre) return;
+    presetsUsuarios.push({ nombre, colores: Object.assign({}, tema) });
+    guardarPresetsUsuarios();
+    renderAjustes();
+    toast(t('presetGuardado'));
+}
 
 const PRESETS = [
     { nombre: 'Océano', colores: { fondo: '#0f172a', panel: '#1e293b', panel2: '#334155', borde: '#475569', texto: '#f1f5f9', textoS: '#94a3b8', acento: '#3b82f6' } },
@@ -28,6 +48,51 @@ let modo = 'cuadricula';
 let tema = Object.assign({}, TEMA_DEFECTO);
 let modoClaro = false;
 
+/* ---------- Historial (deshacer / rehacer) ---------- */
+const pilaDeshacer = [];
+const pilaRehacer = [];
+function snapshotEstado() {
+    return JSON.stringify({
+        elementos: Array.from(elementos.values()),
+        contadorId, contadorSeccion, contadorPestania,
+        pestañas, pestañaActiva, paleta, modo, COLUMNAS, colorCuadricula, seleccionId
+    });
+}
+function pushHistorial(estadoPrevio) {
+    pilaDeshacer.push(estadoPrevio);
+    if (pilaDeshacer.length > 80) pilaDeshacer.shift();
+    pilaRehacer.length = 0;
+}
+function deshacer() {
+    if (!pilaDeshacer.length) { toast(t('sinDeshacer')); return; }
+    pilaRehacer.push(snapshotEstado());
+    restaurarEstado(pilaDeshacer.pop());
+    toast(t('deshecho'));
+}
+function rehacer() {
+    if (!pilaRehacer.length) { toast(t('sinRehacer')); return; }
+    pilaDeshacer.push(snapshotEstado());
+    restaurarEstado(pilaRehacer.pop());
+    toast(t('rehecho'));
+}
+function restaurarEstado(str) {
+    const s = JSON.parse(str);
+    elementos.clear();
+    (s.elementos || []).forEach(e => elementos.set(e.id, e));
+    contadorId = s.contadorId; contadorSeccion = s.contadorSeccion; contadorPestania = s.contadorPestania;
+    pestañas = s.pestañas; pestañaActiva = s.pestañaActiva;
+    paleta = s.paleta; modo = s.modo; COLUMNAS = s.COLUMNAS;
+    if (s.colorCuadricula) colorCuadricula = s.colorCuadricula;
+    seleccionId = null;
+    document.getElementById('btn-modo').textContent = modo === 'cuadricula' ? t('modoCuadricula') : t('modoLibre');
+    renderPestanas();
+    renderPaleta();
+    renderLienzo();
+    actualizarTopBar();
+    cerrarEditor();
+    marcarCambio();
+}
+
 /* ---------- Utilidades ---------- */
 function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -36,6 +101,11 @@ function norm(s) {
     return String(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function hexToRgba(hex, alpha) {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!m) return 'rgba(37,99,235,.12)';
+    return 'rgba(' + parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) + ',' + alpha + ')';
+}
 function pestañaActual() {
     return pestañas.find(p => p.id === pestañaActiva) || null;
 }
@@ -122,6 +192,10 @@ function applyTraducciones() {
     acc.querySelectorAll('.btn').forEach((b, i) => b.textContent = t(claves[i]));
     document.getElementById('btn-panel').title = t('panel');
     document.getElementById('btn-nueva-pestania').title = t('nuevaPestaniaTxt');
+    const und = document.querySelector('#barra .btn[onclick="deshacer()"]');
+    const red = document.querySelector('#barra .btn[onclick="rehacer()"]');
+    if (und) und.title = t('deshacer');
+    if (red) red.title = t('rehacer');
     document.documentElement.lang = idioma;
 }
 
@@ -280,6 +354,7 @@ async function nuevaSeccion(esSub) {
     const label = esSub ? t('pNombreSubseccion') : t('pNombreSeccion');
     const nombre = await dialogoPrompt(label);
     if (!nombre) return;
+    pushHistorial(snapshotEstado());
     if (esSub) {
         const raiz = paleta[paleta.length - 1];
         if (!raiz) paleta.push(nuevaSeccionObj(nombre));
@@ -305,7 +380,7 @@ async function renombrarSeccion(id) {
     const r = buscarSeccion(id, paleta);
     if (!r) return;
     const nombre = await dialogoPrompt(t('pNuevoNombre'), nombreSeccion(r.sec));
-    if (nombre) { r.sec.renombrado = true; r.sec.nombre = nombre; renderPaleta(); }
+    if (nombre) { pushHistorial(snapshotEstado()); r.sec.renombrado = true; r.sec.nombre = nombre; renderPaleta(); }
 }
 
 function moverSeccion(id, dir) {
@@ -324,6 +399,7 @@ async function eliminarSeccion(id) {
     if (!r) return;
     const ok = await dialogoConfirmar(tFmt('pConfirmarEliminarSeccion', { s: nombreSeccion(r.sec) }));
     if (!ok) return;
+    pushHistorial(snapshotEstado());
     r.lista.splice(r.lista.indexOf(r.sec), 1);
     renderPaleta();
 }
@@ -363,7 +439,9 @@ document.addEventListener('click', e => {
 });
 
 function togglePanel() {
-    document.getElementById('panel').classList.toggle('oculto');
+    const p = document.getElementById('panel');
+    p.classList.toggle('oculto');
+    document.getElementById('panel-editor').classList.toggle('sin-paleta', p.classList.contains('oculto'));
 }
 
 /* ============================================================
@@ -397,6 +475,7 @@ async function nuevaPestania(nombre, silencioso) {
         if (name === null) return null;
     }
     name = name || t('pNuevaPestania');
+    pushHistorial(snapshotEstado());
     const id = 'tab_' + (++contadorPestania);
     pestañas.push({ id, nombre: name, ancho: 1280, alto: 720, fondo: '#ffffff', raices: [], zoom: 1 });
     cambiarPestania(id);
@@ -416,7 +495,7 @@ async function renombrarPestania(id) {
     const p = pestañas.find(x => x.id === id);
     if (!p) return;
     const nombre = await dialogoPrompt(t('pRenombrarPestania'), p.nombre);
-    if (nombre) { p.nombre = nombre; renderPestanas(); }
+    if (nombre) { pushHistorial(snapshotEstado()); p.nombre = nombre; renderPestanas(); }
 }
 
 async function cerrarPestania(id) {
@@ -424,6 +503,7 @@ async function cerrarPestania(id) {
     if (!p) return;
     const ok = await dialogoConfirmar(tFmt('pConfirmarCerrarPestania', { s: p.nombre }));
     if (!ok) return;
+    pushHistorial(snapshotEstado());
     const idx = pestañas.indexOf(p);
     pestañas.splice(idx, 1);
     p.raices.forEach(r => eliminarSubarbol(r));
@@ -449,12 +529,13 @@ function actualizarTopBar() {
     document.getElementById('ent-ancho').value = tab.ancho;
     document.getElementById('ent-alto').value = tab.alto;
     document.getElementById('ent-fondo').value = tab.fondo;
-    document.getElementById('zoom-porc').textContent = Math.round(tab.zoom * 100) + '%';
+    document.getElementById('zoom-porc').value = Math.round(tab.zoom * 100);
 }
 
 function cambiarFondo() {
     const tab = pestañaActual();
     if (!tab) return;
+    pushHistorial(snapshotEstado());
     tab.fondo = document.getElementById('ent-fondo').value;
     aplicarFondo();
 }
@@ -473,9 +554,10 @@ function aplicarFondo() {
         lienzo.style.gridAutoRows = ALTO_FILA + 'px';
         lienzo.style.gridColumnGap = GAP + 'px';
         lienzo.style.gridRowGap = GAP + 'px';
+        const cc = hexToRgba(colorCuadricula, 0.12);
         lienzo.style.backgroundImage =
-            'linear-gradient(to right, rgba(37,99,235,.06) 1px, transparent 1px), ' +
-            'linear-gradient(to bottom, rgba(37,99,235,.06) 1px, transparent 1px)';
+            'linear-gradient(to right, ' + cc + ' 1px, transparent 1px), ' +
+            'linear-gradient(to bottom, ' + cc + ' 1px, transparent 1px)';
         lienzo.style.backgroundSize = (colW + GAP) + 'px ' + (ALTO_FILA + GAP) + 'px';
     } else {
         lienzo.classList.remove('modo-cuadricula');
@@ -493,13 +575,22 @@ function aplicarZoom() {
     wrap.style.width = (tab.ancho * tab.zoom) + 'px';
     wrap.style.height = (tab.alto * tab.zoom) + 'px';
     wrap.style.transform = 'scale(' + tab.zoom + ')';
-    document.getElementById('zoom-porc').textContent = Math.round(tab.zoom * 100) + '%';
+    document.getElementById('zoom-porc').value = Math.round(tab.zoom * 100);
 }
 
 function zoomPorcentaje(delta) {
     const tab = pestañaActual();
     if (!tab) return;
     tab.zoom = clamp(Math.round((tab.zoom + delta) * 100) / 100, 0.25, 3);
+    aplicarZoom();
+}
+
+function zoomManual() {
+    const tab = pestañaActual();
+    if (!tab) return;
+    const inp = document.getElementById('zoom-porc');
+    const v = clamp(parseInt(inp.value) || 100, 25, 300);
+    tab.zoom = v / 100;
     aplicarZoom();
 }
 
@@ -632,7 +723,7 @@ function nuevoElemento(tipo) {
     const id = 'elem_' + contadorId++;
     elementos.set(id, {
         id, tipo,
-        nombre: tipoLabel(tipo),
+        nombre: nombreUnico(tipoLabel(tipo)),
         texto: tipoTexto(tipo),
         x: 0, y: 0, w: t.w, h: t.h,
         col: 1, fila: 1, spanCol: t.span, spanRow: Math.max(1, Math.round(t.h / ALTO_FILA)),
@@ -648,6 +739,16 @@ function nuevoElemento(tipo) {
         anim: t.anim || 'ninguna'
     });
     return id;
+}
+
+/* Nombre único: si ya existe uno igual, se añade -1, -2, -3… */
+function nombreUnico(base) {
+    const nombres = new Set();
+    elementos.forEach(e => nombres.add(e.nombre));
+    if (!nombres.has(base)) return base;
+    let i = 1;
+    while (nombres.has(base + '-' + i)) i++;
+    return base + '-' + i;
 }
 
 function esContenedor(id) {
@@ -677,6 +778,7 @@ function coordRel(x, y, ref) {
 function colocarTipo(tipo, clienteX, clienteY) {
     const tab = pestañaActual();
     if (!tab) return;
+    pushHistorial(snapshotEstado());
     const id = nuevoElemento(tipo);
     const el = elementos.get(id);
     const t = TIPOS[tipo];
@@ -708,6 +810,7 @@ function colocarTipo(tipo, clienteX, clienteY) {
         }
         el.x = Math.max(0, Math.min(el.x, areaW - t.w));
         el.y = Math.max(0, Math.min(el.y, areaH - t.h));
+        libreAGrid(el, contenedor);
     } else {
         if (clienteX != null) {
             const ref = contenedor
@@ -718,9 +821,11 @@ function colocarTipo(tipo, clienteX, clienteY) {
             el.col = clamp(Math.round((o.x - GAP / 2) / (colW + GAP)) + 1, 1, COLUMNAS);
             el.fila = Math.max(1, Math.floor(o.y / (ALTO_FILA + GAP)) + 1);
             if (el.col + el.spanCol - 1 > COLUMNAS) el.spanCol = Math.max(1, COLUMNAS - el.col + 1);
+            gridALibre(el, contenedor);
         } else {
             const libre = celdaLibre(contenedor ? contenedor.id : null);
             el.col = libre.col; el.fila = libre.fila;
+            gridALibre(el, contenedor);
         }
     }
 
@@ -796,6 +901,8 @@ function iniciarEventos() {
                 const areaH = cont ? cont.h : tab.alto;
                 el.x = Math.max(0, Math.min(origX + (ev.clientX - inicioX) / z, areaW - el.w));
                 el.y = Math.max(0, Math.min(origY + (ev.clientY - inicioY) / z, areaH - el.h));
+                libreAGrid(el, cont);
+                aplicarEstilos(document.querySelector('[data-id="' + id + '"]'), el, true);
             } else {
                 const o = coordRel(ev.clientX, ev.clientY, ref);
                 const colW = ((cont ? cont.w : tab.ancho) - (COLUMNAS - 1) * GAP) / COLUMNAS;
@@ -803,6 +910,7 @@ function iniciarEventos() {
                 const fila = Math.max(1, Math.floor(o.y / (ALTO_FILA + GAP)) + 1);
                 if (el.col !== col || el.fila !== fila) {
                     el.col = col; el.fila = fila;
+                    gridALibre(el, cont);
                     aplicarEstilos(document.querySelector('[data-id="' + id + '"]'), el, true);
                 }
             }
@@ -811,9 +919,7 @@ function iniciarEventos() {
         function alSoltar() {
             document.removeEventListener('mousemove', alMover);
             document.removeEventListener('mouseup', alSoltar);
-            if (modo === 'libre' && movido) {
-                aplicarEstilos(document.querySelector('[data-id="' + id + '"]'), el, true);
-            }
+            if (movido) pushHistorial(snapshotEstado());
         }
         document.addEventListener('mousemove', alMover);
         document.addEventListener('mouseup', alSoltar);
@@ -838,14 +944,15 @@ function iniciarEventos() {
         function alMover(ev) {
             const dx = (ev.clientX - inicioX) / z;
             const dy = (ev.clientY - inicioY) / z;
+            const cont = el.padre ? elementos.get(el.padre) : null;
             if (modo === 'libre') {
                 if (dir.includes('e')) el.w = Math.max(20, oW + dx);
                 if (dir.includes('s')) el.h = Math.max(20, oH + dy);
                 if (dir.includes('w')) { el.w = Math.max(20, oW - dx); el.x = oX + (oW - el.w); }
                 if (dir.includes('n')) { el.h = Math.max(20, oH - dy); el.y = oY + (oH - el.h); }
+                libreAGrid(el, cont);
                 aplicarEstilos(document.querySelector('[data-id="' + id + '"]'), el, true);
             } else {
-                const cont = el.padre ? elementos.get(el.padre) : null;
                 const ref = cont
                     ? document.querySelector('[data-id="' + cont.id + '"]')
                     : document.getElementById('lienzo');
@@ -858,12 +965,14 @@ function iniciarEventos() {
                     el.col = Math.max(1, Math.min(COLUMNAS, oCol));
                     if (el.col + el.spanCol - 1 > COLUMNAS) el.spanCol = COLUMNAS - el.col + 1;
                 }
+                gridALibre(el, cont);
                 aplicarEstilos(document.querySelector('[data-id="' + id + '"]'), el, true);
             }
         }
         function alSoltar() {
             document.removeEventListener('mousemove', alMover);
             document.removeEventListener('mouseup', alSoltar);
+            pushHistorial(snapshotEstado());
             sincronizarEditor();
         }
         document.addEventListener('mousemove', alMover);
@@ -922,6 +1031,7 @@ function iniciarEventos() {
         function alSoltar() {
             document.removeEventListener('mousemove', alMover);
             document.removeEventListener('mouseup', alSoltar);
+            pushHistorial(snapshotEstado());
             renderLienzo();
         }
         document.addEventListener('mousemove', alMover);
@@ -937,8 +1047,7 @@ function toggleModo() {
 }
 function cambiarModo(nuevo) {
     if (modo === nuevo) return;
-    if (nuevo === 'cuadricula') convertirLibreAGrid(null, null);
-    else convertirGridALibre(null, null);
+    pushHistorial(snapshotEstado());
     modo = nuevo;
     document.getElementById('btn-modo').textContent = modo === 'cuadricula' ? t('modoCuadricula') : t('modoLibre');
     renderLienzo();
@@ -958,6 +1067,25 @@ function convertirGridALibre(padreId, padreW) {
     });
 }
 
+/* Mantener sincronizados ambos sistemas de coordenadas (cuadrícula y libre).
+   Así, al cambiar de modo los elementos conservan su posición sin reacomodarse. */
+function gridALibre(el, cont) {
+    const areaW = cont ? cont.w : (pestañaActual() ? pestañaActual().ancho : 1280);
+    const colW = (areaW - (COLUMNAS - 1) * GAP) / COLUMNAS;
+    el.x = (el.col - 1) * (colW + GAP);
+    el.y = (el.fila - 1) * (ALTO_FILA + GAP);
+    el.w = el.spanCol * colW + (el.spanCol - 1) * GAP;
+    el.h = el.spanRow * ALTO_FILA + (el.spanRow - 1) * GAP;
+}
+function libreAGrid(el, cont) {
+    const areaW = cont ? cont.w : (pestañaActual() ? pestañaActual().ancho : 1280);
+    const colW = (areaW - (COLUMNAS - 1) * GAP) / COLUMNAS;
+    el.col = clamp(Math.round(el.x / (colW + GAP)) + 1, 1, COLUMNAS);
+    el.spanCol = clamp(Math.round(el.w / (colW + GAP)), 1, COLUMNAS - el.col + 1);
+    el.fila = Math.max(1, Math.round(el.y / (ALTO_FILA + GAP)) + 1);
+    el.spanRow = Math.max(1, Math.round(el.h / (ALTO_FILA + GAP)));
+}
+
 function convertirLibreAGrid(padreId, padreW) {
     const lista = padreId ? elementos.get(padreId).hijos : raices();
     const w = padreW != null ? padreW : (pestañaActual() ? pestañaActual().ancho : 1280);
@@ -973,19 +1101,21 @@ function convertirLibreAGrid(padreId, padreW) {
 }
 
 function autoAcomodar() {
+    pushHistorial(snapshotEstado());
     if (modo !== 'cuadricula') cambiarModo('cuadricula');
-    function acomodar(lista) {
+    function acomodar(lista, cont) {
         let col = 1, fila = 1;
         lista.forEach(id => {
             const el = elementos.get(id);
             if (col + el.spanCol - 1 > COLUMNAS) { col = 1; fila++; }
             el.col = col;
             el.fila = fila;
+            gridALibre(el, cont);
             col += el.spanCol;
-            if (el.hijos.length) acomodar(el.hijos);
+            if (el.hijos.length) acomodar(el.hijos, el);
         });
     }
-    acomodar(raices());
+    acomodar(raices(), null);
     renderLienzo();
 }
 
@@ -993,6 +1123,7 @@ function autoAcomodar() {
 function aplicarTamanoLienzo() {
     const tab = pestañaActual();
     if (!tab) return;
+    pushHistorial(snapshotEstado());
     tab.ancho = clamp(parseInt(document.getElementById('ent-ancho').value) || 800, 200, 4000);
     tab.alto = clamp(parseInt(document.getElementById('ent-alto').value) || 600, 150, 3000);
     aplicarFondo();
@@ -1004,6 +1135,7 @@ function aplicarPreset() {
     const [a, h] = v.split(',');
     const tab = pestañaActual();
     if (!tab) return;
+    pushHistorial(snapshotEstado());
     tab.ancho = +a; tab.alto = +h;
     document.getElementById('sel-preset').value = '';
     aplicarFondo();
@@ -1020,18 +1152,6 @@ function abrirEditor() {
 }
 function cerrarEditor() {
     document.getElementById('panel-editor').classList.remove('abierto');
-}
-function minimizarEditor() {
-    const p = document.getElementById('panel-editor');
-    p.classList.toggle('minimizado');
-}
-function minimizarFaq() {
-    const p = document.getElementById('panel-faq');
-    p.classList.toggle('minimizado');
-}
-function minimizarAjustes() {
-    const p = document.getElementById('modal-ajustes');
-    p.classList.toggle('minimizado');
 }
 
 function sincronizarEditor() {
@@ -1326,6 +1446,7 @@ function aplicarLive() {
 function accionEditor(accion) {
     const id = seleccionId;
     if (!id || !elementos.has(id)) return;
+    pushHistorial(snapshotEstado());
     const el = elementos.get(id);
     const lista = el.padre ? elementos.get(el.padre).hijos : raices();
     const i = lista.indexOf(id);
@@ -1359,6 +1480,7 @@ function eliminarSubarbol(id) {
 
 function duplicar(id) {
     const orig = elementos.get(id);
+    pushHistorial(snapshotEstado());
     const mapa = new Map();
     function copiar(oid) {
         const o = elementos.get(oid);
@@ -1392,6 +1514,7 @@ function datosProyecto() {
         tema,
         modoClaro,
         columnas: COLUMNAS,
+        colorCuadricula,
         modo,
         paleta,
         pestañaActiva,
@@ -1451,7 +1574,8 @@ function restaurarProyecto(datos) {
     idioma = datos.idioma || 'es';
     tema = Object.assign({}, TEMA_DEFECTO, datos.tema || {});
     modoClaro = !!datos.modoClaro;
-    if (datos.columnas && datos.columnas >= 4 && datos.columnas <= 24) COLUMNAS = datos.columnas;
+    if (datos.columnas && datos.columnas >= 4 && datos.columnas <= 50) COLUMNAS = datos.columnas;
+    if (datos.colorCuadricula) colorCuadricula = datos.colorCuadricula;
     modo = datos.modo || 'cuadricula';
     seleccionId = null;
     aplicarTema();
@@ -1466,6 +1590,7 @@ function restaurarProyecto(datos) {
 async function limpiarLienzo() {
     const ok = await dialogoConfirmar(t('limpiarLienzoConfirm'));
     if (!ok) return;
+    pushHistorial(snapshotEstado());
     localStorage.removeItem('pb_proyecto');
     elementos.clear();
     contadorId = 1;
@@ -1477,6 +1602,7 @@ async function limpiarLienzo() {
     paleta = crearPaletaDefault();
     tema = Object.assign({}, TEMA_DEFECTO);
     modoClaro = false;
+    colorCuadricula = '#2563eb';
     idioma = 'es';
     const idInicial = 'tab_' + (++contadorPestania);
     pestañas = [{ id: idInicial, nombre: t('pestaniaInicio'), ancho: 1280, alto: 720, fondo: '#ffffff', raices: [], zoom: 1 }];
@@ -1679,17 +1805,72 @@ function renderAjustesApariencia(panel) {
     gPre.appendChild(notaPre);
     const chips = document.createElement('div');
     chips.className = 'preset-chips';
-    PRESETS.forEach((pres, idx) => {
+    PRESETS.forEach((pres) => {
         const c = document.createElement('div');
         c.className = 'preset-chip';
         c.title = pres.nombre;
         c.style.background = 'linear-gradient(135deg, ' + pres.colores.panel + ' 0%, ' + pres.colores.panel2 + ' 100%)';
         c.style.borderLeft = '4px solid ' + pres.colores.acento;
-        c.onclick = () => aplicarPreset(pres.colores);
+        c.onclick = () => aplicarPresetColor(pres.colores);
         chips.appendChild(c);
     });
+    (presetsUsuarios || []).forEach((pres, idx) => {
+        const env = document.createElement('div');
+        env.className = 'preset-env';
+        const c = document.createElement('div');
+        c.className = 'preset-chip';
+        c.title = pres.nombre;
+        c.style.background = 'linear-gradient(135deg, ' + pres.colores.panel + ' 0%, ' + pres.colores.panel2 + ' 100%)';
+        c.style.borderLeft = '4px solid ' + pres.colores.acento;
+        c.onclick = () => aplicarPresetColor(pres.colores);
+        env.appendChild(c);
+        const x = document.createElement('button');
+        x.className = 'mini del';
+        x.title = t('aEliminarPreset');
+        x.textContent = '✕';
+        x.onclick = e => {
+            e.stopPropagation();
+            presetsUsuarios.splice(idx, 1);
+            guardarPresetsUsuarios();
+            renderAjustes();
+        };
+        env.appendChild(x);
+        chips.appendChild(env);
+    });
+    const filaPre = document.createElement('div');
+    filaPre.className = 'fila';
+    const bNuevo = document.createElement('button');
+    bNuevo.className = 'btn';
+    bNuevo.textContent = t('aGuardarPreset');
+    bNuevo.onclick = () => guardarPresetActual();
+    filaPre.appendChild(bNuevo);
     gPre.appendChild(chips);
+    gPre.appendChild(filaPre);
     panel.appendChild(gPre);
+
+    // Color de la cuadrícula
+    const gGrid = document.createElement('div');
+    gGrid.className = 'grupo';
+    const hGrid = document.createElement('h4');
+    hGrid.textContent = t('aColorCuadricula');
+    gGrid.appendChild(hGrid);
+    const filaGrid = document.createElement('div');
+    filaGrid.className = 'fila';
+    filaGrid.id = 'fila-color-cuadricula';
+    const labGrid = document.createElement('label');
+    labGrid.textContent = t('aColorCuadricula');
+    const inpGrid = document.createElement('input');
+    inpGrid.type = 'color';
+    inpGrid.id = 'ent-color-cuadricula';
+    inpGrid.value = colorCuadricula;
+    inpGrid.addEventListener('input', () => {
+        colorCuadricula = inpGrid.value;
+        aplicarFondo();
+    });
+    filaGrid.appendChild(labGrid);
+    filaGrid.appendChild(inpGrid);
+    gGrid.appendChild(filaGrid);
+    panel.appendChild(gGrid);
 
     // Columnas de la cuadrícula
     const gCol = document.createElement('div');
@@ -1706,12 +1887,13 @@ function renderAjustesApariencia(panel) {
     const inpCol = document.createElement('input');
     inpCol.type = 'number';
     inpCol.min = 4;
-    inpCol.max = 24;
+    inpCol.max = 50;
     inpCol.value = COLUMNAS;
     const lblCol = document.createElement('label');
     lblCol.textContent = COLUMNAS + ' col';
     inpCol.onchange = () => {
-        const v = clamp(parseInt(inpCol.value) || 12, 4, 24);
+        const v = clamp(parseInt(inpCol.value) || 12, 4, 50);
+        if (v !== COLUMNAS) pushHistorial(snapshotEstado());
         COLUMNAS = v;
         lblCol.textContent = v + ' col';
         renderLienzo();
@@ -1778,7 +1960,7 @@ function aplicarModoApariencia(claro) {
     renderAjustes();
 }
 
-function aplicarPreset(colores) {
+function aplicarPresetColor(colores) {
     tema = Object.assign({}, colores);
     modoClaro = colores.fondo === TEMA_CLARO.fondo;
     aplicarTema();
@@ -1879,6 +2061,7 @@ function init() {
 
     aplicarTema();
     applyTraducciones();
+    cargarPresetsUsuarios();
     renderPestanas();
     renderPaleta();
     renderLienzo();
