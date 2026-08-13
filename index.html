@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptBlueprint v1.1.0</title>
+    <title>PromptBlueprint v1.2.0</title>
     <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 
     <!-- ===== BARRA SUPERIOR ===== -->
     <div id="barra">
-        <div class="titulo">Prompt<span>Blueprint</span> <span class="ver">v1.1.0</span></div>
+        <div class="titulo">Prompt<span>Blueprint</span> <span class="ver">v1.2.0</span></div>
 
         <button class="btn" id="btn-panel" onclick="togglePanel()" data-i18n="panel"></button>
 
@@ -39,12 +39,13 @@
             <option value="375,667" data-i18n="presetMovilPequeno"></option>
         </select>
         <label data-i18n="fondo"></label>
-        <input type="color" id="ent-fondo" value="#ffffff" onchange="aplicarFondo()">
+        <input type="color" id="ent-fondo" value="#ffffff" onchange="cambiarFondo()">
 
         <div class="sep"></div>
         <button class="btn verde" onclick="exportar()" data-i18n="exportarJSON"></button>
         <button class="btn" onclick="guardarProyecto()" data-i18n="guardarProyecto"></button>
         <button class="btn" onclick="document.getElementById('ent-cargar').click()" data-i18n="cargarProyecto"></button>
+        <button class="btn" onclick="limpiarLienzo()" data-i18n="limpiarLienzo"></button>
         <button class="btn" onclick="abrirAjustes()" data-i18n="ajustes"></button>
     </div>
 
@@ -85,9 +86,12 @@
     <!-- Panel de edición (izquierda de la pantalla) -->
     <div id="panel-editor">
         <div id="editor-cabecera">
+            <div class="ventana-controles">
+                <button class="vc minimizar" onclick="minimizarEditor()" title="Minimizar">—</button>
+                <button class="vc cerrar" onclick="cerrarEditor()" title="Cerrar">✕</button>
+            </div>
             <h4 data-i18n="propiedades"></h4>
             <span class="etiqueta-tipo" id="etiqueta-tipo"></span>
-            <button class="cerrar-editor" onclick="cerrarEditor()">✕</button>
         </div>
         <div id="editor-cuerpo"></div>
         <div id="editor-acciones">
@@ -103,8 +107,11 @@
     <button id="boton-faq" onclick="toggleFaq()">?</button>
     <div id="panel-faq">
         <div id="faq-cabecera">
+            <div class="ventana-controles">
+                <button class="vc minimizar" onclick="minimizarFaq()" title="Minimizar">—</button>
+                <button class="vc cerrar" onclick="toggleFaq()" title="Cerrar">✕</button>
+            </div>
             <h4 data-i18n="faqTitulo"></h4>
-            <button class="cerrar-editor" onclick="toggleFaq()">✕</button>
         </div>
         <div id="faq-cuerpo"></div>
     </div>
@@ -114,7 +121,9 @@
         <div class="modal-caja">
             <div id="modal-cabecera">
                 <h3 data-i18n="exportarTitulo"></h3>
-                <button class="cerrar-editor" onclick="cerrarModal()">✕</button>
+                <div class="ventana-controles">
+                    <button class="vc cerrar" onclick="cerrarModal()" title="Cerrar">✕</button>
+                </div>
             </div>
             <div id="modal-cuerpo">
                 <textarea id="json-salida" readonly spellcheck="false"></textarea>
@@ -131,10 +140,33 @@
         <div class="modal-caja">
             <div id="modal-cabecera">
                 <h3 data-i18n="ajustesTitulo"></h3>
-                <button class="cerrar-editor" onclick="cerrarAjustes()">✕</button>
+                <div class="ventana-controles">
+                    <button class="vc minimizar" onclick="minimizarAjustes()" title="Minimizar">—</button>
+                    <button class="vc cerrar" onclick="cerrarAjustes()" title="Cerrar">✕</button>
+                </div>
             </div>
             <div id="ajustes-nav"></div>
             <div id="ajustes-panel"></div>
+        </div>
+    </div>
+
+    <!-- Diálogo de confirmación/entrada propio -->
+    <div class="modal-fondo" id="modal-dialogo">
+        <div class="modal-caja dialogo-caja">
+            <div id="modal-cabecera">
+                <h3 id="dialogo-titulo" data-i18n="ajustesTitulo"></h3>
+                <div class="ventana-controles">
+                    <button class="vc cerrar" onclick="cerrarDialogo()" title="Cerrar">✕</button>
+                </div>
+            </div>
+            <div id="dialogo-cuerpo">
+                <div id="dialogo-mensaje"></div>
+                <input type="text" id="dialogo-input" style="display:none">
+            </div>
+            <div id="modal-acciones">
+                <button class="btn" id="dialogo-cancelar" onclick="cancelarDialogo()" data-i18n="dCancelar"></button>
+                <button class="btn verde" id="dialogo-aceptar" onclick="aceptarDialogo()" data-i18n="dAceptar"></button>
+            </div>
         </div>
     </div>
 

@@ -82,3 +82,38 @@ Versión 1.1.0 — Cambios grandes solicitados por el usuario:
   - Commit `791cbd8` "feat: PromptBlueprint v1.1.0…" + tag `v1.1.0` y push a main.
   - Release "PromptBlueprint v1.1.0" con el asset `PromptBlueprint-v1.1.0.zip` (index.html + css/ + js/ + README):
     https://github.com/irvinMartinez2709/PromptBlueprint/releases/tag/v1.1.0
+
+---
+
+### 4
+
+2026-08-13 17:15
+
+Versión 1.2.0 — 15 cambios solicitados por el usuario:
+
+1. Cantidad de cuadrículas personalizable desde Ajustes (campo numérico, se guarda y se exporta al JSON).
+2. Corregir "Acerca de": ya no duplica las etiquetas ("Versión: Versión…" → "Versión: 1.2.0").
+3. Permitir no colocar color (opacidad): casilla "sin color" en el editor para fondo y para color de texto (transparente).
+4. El panel de propiedades sale de la izquierda de la pantalla (position fixed left:0, animación translateX).
+5. Los textos pueden decidir si llevar fondo o no (misma casilla "sin color").
+6. Elementos redimensionables libremente con un mango propio (mango-el) igual que el del lienzo.
+7. Corregido el color del lienzo desde la barra: antes `aplicarFondo()` no leía el input; ahora `cambiarFondo()`.
+8. Al eliminar un elemento, el panel de propiedades se oculta automáticamente.
+9. Botón "Ir a la sección" en el editor para enlaces/botones con destino de navegación (cambia de pestaña).
+10. Ventanas emergentes de confirmación/entrada PROPIAS (modal-dialogo) en lugar de prompt()/confirm() del navegador.
+11. Modo claro/oscuro en Ajustes (TEMA_CLARO / TEMA_OSCURO).
+12. Presets de color en Ajustes (6 conjuntos completos que cambian toda la interfaz).
+13. Las preguntas del "?" ahora también están en Ajustes → Ayuda.
+14. Botones de control de ventana (minimizar/cerrar) en editor, FAQ y modales, estilo Windows/macOS pero solo los necesarios.
+15. Autoguardado en localStorage + botón "Limpiar lienzo" (opción B elegida): al recargar se conserva lo hecho; "Limpiar lienzo" borra todo.
+
+[Qué hice yo (Opencode)]
+- Cargué skill `registro`; revisé js/app.js, js/i18n.js, css/app.css, js/tipos.js e index.html.
+- Añadí traducciones nuevas ES/EN (limpiarLienzo, diálogos, sin color, presets, modo claro/oscuro, columnas, ayuda, ir a sección) y corregí las etiquetas de "Acerca de".
+- Cambié COLUMNAS de `const` a `let` en tipos.js y lo hice configurable desde Ajustes.
+- Añadí PRESETS, TEMA_CLARO/TEMA_OSCURO, diálogo propio (abrirDialogo/aceptar/cancelar), mango-el, cambiarFondo(), autoguardado (guardarEstado/marcarCambio) y limpiarLienzo().
+- Sustituí todas las llamadas a prompt()/confirm() por el diálogo propio.
+- Añadí controles de ventana en index.html (editor, FAQ, modales) y CSS asociado.
+- Verifiqué con Playwright (`pwtest\pb12-test.cjs`): 40/40 checks PASS, sin errores JS.
+- Actualicé README.md para v1.2.0.
+- Publicar en GitHub: commit, tag `v1.2.0`, push y Release (pendiente de ejecutar).

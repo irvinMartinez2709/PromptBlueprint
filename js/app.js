@@ -1,8 +1,19 @@
 /* ============================================================
-   PROMPTBLUEPRINT v1.1.0 — Lógica principal
+   PROMPTBLUEPRINT v1.2.0 — Lógica principal
    ============================================================ */
-const VERSION = '1.1.0';
-const TEMA_DEFECTO = { fondo: '#1e1e24', panel: '#2a2b36', panel2: '#353647', borde: '#3f4052', texto: '#e6e6f0', textoS: '#a5a6c4', acento: '#2563eb' };
+const VERSION = '1.2.0';
+const TEMA_OSCURO = { fondo: '#1e1e24', panel: '#2a2b36', panel2: '#353647', borde: '#3f4052', texto: '#e6e6f0', textoS: '#a5a6c4', acento: '#2563eb' };
+const TEMA_CLARO = { fondo: '#eef1f6', panel: '#ffffff', panel2: '#f3f5f9', borde: '#d4d9e3', texto: '#20242e', textoS: '#5c6474', acento: '#2563eb' };
+const TEMA_DEFECTO = TEMA_OSCURO;
+
+const PRESETS = [
+    { nombre: 'Océano', colores: { fondo: '#0f172a', panel: '#1e293b', panel2: '#334155', borde: '#475569', texto: '#f1f5f9', textoS: '#94a3b8', acento: '#3b82f6' } },
+    { nombre: 'Esmeralda', colores: { fondo: '#0f1f1a', panel: '#1d3a31', panel2: '#2b4d41', borde: '#3d5f53', texto: '#ecfdf5', textoS: '#9fbfb2', acento: '#10b981' } },
+    { nombre: 'Violeta', colores: { fondo: '#171226', panel: '#2a2140', panel2: '#3b2f5c', borde: '#4d3f72', texto: '#f3eefc', textoS: '#b3a6d6', acento: '#8b5cf6' } },
+    { nombre: 'Atardecer', colores: { fondo: '#241016', panel: '#3d1e26', panel2: '#552a35', borde: '#6b3946', texto: '#fdf2f4', textoS: '#d5a8b0', acento: '#ec4899' } },
+    { nombre: 'Claro clásico', colores: { fondo: '#eef1f6', panel: '#ffffff', panel2: '#f3f5f9', borde: '#d4d9e3', texto: '#20242e', textoS: '#5c6474', acento: '#2563eb' } },
+    { nombre: 'Medianoche', colores: { fondo: '#0a0a0f', panel: '#16161f', panel2: '#23232f', borde: '#34343f', texto: '#e8e8f0', textoS: '#8f8faa', acento: '#6366f1' } }
+];
 
 /* ---------- Estado ---------- */
 const elementos = new Map();     // id -> objeto (compartido entre pestañas)
@@ -15,6 +26,7 @@ let paleta = [];
 let seleccionId = null;
 let modo = 'cuadricula';
 let tema = Object.assign({}, TEMA_DEFECTO);
+let modoClaro = false;
 
 /* ---------- Utilidades ---------- */
 function esc(s) {
@@ -40,6 +52,48 @@ function toast(msg) {
 }
 
 /* ============================================================
+   DIÁLOGO PROPIO (confirmación / entrada de texto)
+   ============================================================ */
+let dialogoResolver = null;
+
+function abrirDialogo(opciones) {
+    return new Promise(resolve => {
+        dialogoResolver = resolve;
+        document.getElementById('dialogo-titulo').textContent = opciones.titulo;
+        const mensaje = document.getElementById('dialogo-mensaje');
+        mensaje.textContent = opciones.mensaje || '';
+        const inp = document.getElementById('dialogo-input');
+        inp.style.display = opciones.input ? 'block' : 'none';
+        inp.value = opciones.valor || '';
+        document.getElementById('modal-dialogo').classList.add('abierto');
+        if (opciones.input) { inp.focus(); inp.select(); }
+        inp.onkeydown = e => {
+            if (e.key === 'Enter') aceptarDialogo();
+            if (e.key === 'Escape') cancelarDialogo();
+        };
+    });
+}
+
+function aceptarDialogo() {
+    const inp = document.getElementById('dialogo-input');
+    const valor = inp.style.display === 'none' ? true : inp.value;
+    document.getElementById('modal-dialogo').classList.remove('abierto');
+    if (dialogoResolver) { dialogoResolver(valor); dialogoResolver = null; }
+}
+function cancelarDialogo() {
+    document.getElementById('modal-dialogo').classList.remove('abierto');
+    if (dialogoResolver) { dialogoResolver(null); dialogoResolver = null; }
+}
+function cerrarDialogo() { cancelarDialogo(); }
+
+function dialogoConfirmar(mensaje) {
+    return abrirDialogo({ titulo: t('dConfirmar'), mensaje, input: false });
+}
+function dialogoPrompt(titulo, valor) {
+    return abrirDialogo({ titulo, mensaje: '', input: true, valor: valor || '' });
+}
+
+/* ============================================================
    TEMA (colores de la interfaz)
    ============================================================ */
 function aplicarTema() {
@@ -51,6 +105,7 @@ function aplicarTema() {
     r.setProperty('--texto', tema.texto);
     r.setProperty('--texto-suave', tema.textoS);
     r.setProperty('--acento', tema.acento);
+    marcarCambio();
 }
 
 /* ============================================================
@@ -76,6 +131,7 @@ function cambiarIdioma(nuevo) {
     // Actualizar texto de los elementos recién creados no se toca (conservan su texto),
     // pero sí los rótulos de tipos por defecto que aún no se hayan personalizado.
     aplicarIdioma();
+    marcarCambio();
 }
 
 function aplicarIdioma() {
@@ -119,6 +175,7 @@ function renderPaleta() {
     if (q) { renderBusqueda(arbol, q); return; }
     paleta.forEach(sec => arbol.appendChild(renderSeccion(sec)));
     if (!paleta.length) arbol.innerHTML = '<div class="resultado-vacio">' + t('creaSeccion') + '</div>';
+    marcarCambio();
 }
 
 function renderBusqueda(arbol, q) {
@@ -219,9 +276,9 @@ function buscarSeccion(id, arr) {
     return null;
 }
 
-function nuevaSeccion(esSub) {
+async function nuevaSeccion(esSub) {
     const label = esSub ? t('pNombreSubseccion') : t('pNombreSeccion');
-    const nombre = prompt(label);
+    const nombre = await dialogoPrompt(label);
     if (!nombre) return;
     if (esSub) {
         const raiz = paleta[paleta.length - 1];
@@ -237,17 +294,17 @@ function nuevaSeccionObj(nombre) {
     return { id: 'sec_' + (++contadorSeccion), clave: null, renombrado: true, nombre, tipos: [], subs: [], abierto: true };
 }
 
-function nuevaSubseccion(id) {
-    const nombre = prompt(t('pNombreSubseccion'));
+async function nuevaSubseccion(id) {
+    const nombre = await dialogoPrompt(t('pNombreSubseccion'));
     if (!nombre) return;
     const r = buscarSeccion(id, paleta);
     if (r) { r.sec.subs.push(nuevaSeccionObj(nombre)); renderPaleta(); }
 }
 
-function renombrarSeccion(id) {
+async function renombrarSeccion(id) {
     const r = buscarSeccion(id, paleta);
     if (!r) return;
-    const nombre = prompt(t('pNuevoNombre'), nombreSeccion(r.sec));
+    const nombre = await dialogoPrompt(t('pNuevoNombre'), nombreSeccion(r.sec));
     if (nombre) { r.sec.renombrado = true; r.sec.nombre = nombre; renderPaleta(); }
 }
 
@@ -262,10 +319,11 @@ function moverSeccion(id, dir) {
     renderPaleta();
 }
 
-function eliminarSeccion(id) {
+async function eliminarSeccion(id) {
     const r = buscarSeccion(id, paleta);
     if (!r) return;
-    if (!confirm(tFmt('pConfirmarEliminarSeccion', { s: nombreSeccion(r.sec) }))) return;
+    const ok = await dialogoConfirmar(tFmt('pConfirmarEliminarSeccion', { s: nombreSeccion(r.sec) }));
+    if (!ok) return;
     r.lista.splice(r.lista.indexOf(r.sec), 1);
     renderPaleta();
 }
@@ -329,12 +387,13 @@ function renderPestanas() {
         });
         barra.insertBefore(tab, botonNueva);
     });
+    marcarCambio();
 }
 
-function nuevaPestania(nombre, silencioso) {
+async function nuevaPestania(nombre, silencioso) {
     let name = nombre;
     if (name == null) {
-        name = prompt(t('pNombrePestania'), t('pNuevaPestania'));
+        name = await dialogoPrompt(t('pNombrePestania'), t('pNuevaPestania'));
         if (name === null) return null;
     }
     name = name || t('pNuevaPestania');
@@ -353,17 +412,18 @@ function cambiarPestania(id) {
     actualizarTopBar();
 }
 
-function renombrarPestania(id) {
+async function renombrarPestania(id) {
     const p = pestañas.find(x => x.id === id);
     if (!p) return;
-    const nombre = prompt(t('pRenombrarPestania'), p.nombre);
+    const nombre = await dialogoPrompt(t('pRenombrarPestania'), p.nombre);
     if (nombre) { p.nombre = nombre; renderPestanas(); }
 }
 
-function cerrarPestania(id) {
+async function cerrarPestania(id) {
     const p = pestañas.find(x => x.id === id);
     if (!p) return;
-    if (!confirm(tFmt('pConfirmarCerrarPestania', { s: p.nombre }))) return;
+    const ok = await dialogoConfirmar(tFmt('pConfirmarCerrarPestania', { s: p.nombre }));
+    if (!ok) return;
     const idx = pestañas.indexOf(p);
     pestañas.splice(idx, 1);
     p.raices.forEach(r => eliminarSubarbol(r));
@@ -390,6 +450,13 @@ function actualizarTopBar() {
     document.getElementById('ent-alto').value = tab.alto;
     document.getElementById('ent-fondo').value = tab.fondo;
     document.getElementById('zoom-porc').textContent = Math.round(tab.zoom * 100) + '%';
+}
+
+function cambiarFondo() {
+    const tab = pestañaActual();
+    if (!tab) return;
+    tab.fondo = document.getElementById('ent-fondo').value;
+    aplicarFondo();
 }
 
 function aplicarFondo() {
@@ -456,6 +523,7 @@ function renderLienzo() {
     aplicarZoom();
     ajustarTracksContenedores();
     setSeleccion(seleccionId);
+    marcarCambio();
 }
 
 function crearMango() {
@@ -519,8 +587,8 @@ function construirDOM(id) {
 
 function aplicarEstilos(node, el, esLive) {
     const s = el.estilos;
-    node.style.color = s.color;
-    node.style.background = s.fondo === 'transparent' ? 'transparent' : s.fondo;
+    node.style.color = s.sincolorTexto ? 'transparent' : s.color;
+    node.style.background = (s.sincolor || s.fondo === 'transparent') ? 'transparent' : s.fondo;
     node.style.opacity = (s.opacidad / 100).toFixed(2);
     node.style.border = (s.borde > 0 ? s.borde + 'px solid ' + s.bordeColor : 'none');
     node.style.borderRadius = s.radio + 'px';
@@ -574,7 +642,8 @@ function nuevoElemento(tipo) {
             color: t.color, fondo: t.bg, bordeColor: t.bordeColor || '#999999',
             borde: t.borde || 0, radio: t.radio || 0, padding: 6,
             fontSize: t.fontSize || 14, negrita: !!t.negrita, align: 'center',
-            opacidad: 100, sombra: t.sombra || 'none'
+            opacidad: 100, sombra: t.sombra || 'none',
+            sincolor: false, sincolorTexto: false
         },
         anim: t.anim || 'ninguna'
     });
@@ -658,6 +727,7 @@ function colocarTipo(tipo, clienteX, clienteY) {
     if (!contenedor) tab.raices.push(id);
     renderLienzo();
     setSeleccion(id);
+    marcarCambio();
 }
 
 /* ============================================================
@@ -666,7 +736,7 @@ function colocarTipo(tipo, clienteX, clienteY) {
 function setSeleccion(id) {
     document.querySelectorAll('.elemento-web.seleccionado').forEach(n => {
         n.classList.remove('seleccionado');
-        n.querySelectorAll('.handle').forEach(h => h.remove());
+        n.querySelectorAll('.handle, .mango-el').forEach(h => h.remove());
     });
     seleccionId = id;
     if (id && elementos.has(id)) {
@@ -687,6 +757,10 @@ function crearHandles(node) {
         h.dataset.dir = d;
         node.appendChild(h);
     });
+    const mango = document.createElement('div');
+    mango.className = 'mango-el';
+    mango.dataset.dir = 'se';
+    node.appendChild(mango);
 }
 
 function iniciarEventos() {
@@ -695,7 +769,7 @@ function iniciarEventos() {
     // Arrastre de elementos existentes
     lienzo.addEventListener('mousedown', e => {
         if (e.button !== 0) return;
-        if (e.target.closest('.handle')) return;
+        if (e.target.closest('.handle, .mango-el')) return;
         if (e.target.id === 'mango-lienzo') return;
         const node = e.target.closest('.elemento-web');
         if (!node) return;
@@ -745,9 +819,9 @@ function iniciarEventos() {
         document.addEventListener('mouseup', alSoltar);
     });
 
-    // Redimensionar con mangos
+    // Redimensionar con mangos (incluido el mango libre)
     lienzo.addEventListener('mousedown', e => {
-        const h = e.target.closest('.handle');
+        const h = e.target.closest('.handle, .mango-el');
         if (!h) return;
         e.preventDefault();
         e.stopPropagation();
@@ -940,11 +1014,24 @@ function aplicarPreset() {
    PANEL DE EDICIÓN
    ============================================================ */
 function abrirEditor() {
+    document.getElementById('panel-editor').classList.remove('minimizado');
     document.getElementById('panel-editor').classList.add('abierto');
     sincronizarEditor();
 }
 function cerrarEditor() {
     document.getElementById('panel-editor').classList.remove('abierto');
+}
+function minimizarEditor() {
+    const p = document.getElementById('panel-editor');
+    p.classList.toggle('minimizado');
+}
+function minimizarFaq() {
+    const p = document.getElementById('panel-faq');
+    p.classList.toggle('minimizado');
+}
+function minimizarAjustes() {
+    const p = document.getElementById('modal-ajustes');
+    p.classList.toggle('minimizado');
 }
 
 function sincronizarEditor() {
@@ -1026,8 +1113,67 @@ function sincronizarEditor() {
     cuerpo.innerHTML = '';
     cuerpo.appendChild(filaC(t('eNombre'), fNombre));
     if (!tipo.hijos) cuerpo.appendChild(filaC(t('eContenido'), fTexto));
-    cuerpo.appendChild(filaC(t('eColorTexto'), fColor));
-    cuerpo.appendChild(filaC(t('eColorFondo'), fFondo));
+
+    // Color del texto
+    const gColor = document.createElement('div');
+    gColor.className = 'grupo';
+    const lColor = document.createElement('label');
+    lColor.textContent = t('eColorTexto');
+    gColor.appendChild(lColor);
+    const filaColor = document.createElement('div');
+    filaColor.className = 'fila';
+    filaColor.appendChild(fColor);
+    const cbT = document.createElement('input');
+    cbT.type = 'checkbox';
+    cbT.checked = el.estilos.sincolorTexto === true;
+    cbT.onchange = () => {
+        el.estilos.sincolorTexto = cbT.checked;
+        aplicarLive();
+        sincronizarEditor();
+    };
+    const lcbT = document.createElement('label');
+    lcbT.textContent = t('eSinColor');
+    lcbT.style.textTransform = 'none';
+    const fCbT = document.createElement('div');
+    fCbT.className = 'fila-cb';
+    fCbT.appendChild(cbT);
+    fCbT.appendChild(lcbT);
+    gColor.appendChild(filaColor);
+    gColor.appendChild(fCbT);
+    cuerpo.appendChild(gColor);
+
+    // Fondo: color + opción sin color
+    const gFondo = document.createElement('div');
+    gFondo.className = 'grupo';
+    const lFondo = document.createElement('label');
+    lFondo.textContent = t('eColorFondo');
+    gFondo.appendChild(lFondo);
+    const filaFondo = document.createElement('div');
+    filaFondo.className = 'fila';
+    filaFondo.appendChild(fFondo);
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = el.estilos.sincolor === true;
+    cb.onchange = () => {
+        el.estilos.sincolor = cb.checked;
+        aplicarLive();
+        sincronizarEditor();
+    };
+    const lcb = document.createElement('label');
+    lcb.textContent = t('eSinColor');
+    lcb.style.textTransform = 'none';
+    const fCb = document.createElement('div');
+    fCb.className = 'fila-cb';
+    fCb.appendChild(cb);
+    fCb.appendChild(lcb);
+    gFondo.appendChild(filaFondo);
+    gFondo.appendChild(fCb);
+    const notaF = document.createElement('div');
+    notaF.className = 'nota';
+    notaF.textContent = t('eColorFondoNota');
+    gFondo.appendChild(notaF);
+    cuerpo.appendChild(gFondo);
+
     if (el.estilos.borde > 0) cuerpo.appendChild(filaC(t('eColorBorde'), fBordeColor));
     cuerpo.appendChild(filaC(t('eBorde'), rBorde));
     cuerpo.appendChild(filaC(t('eRadio'), rRadio));
@@ -1092,6 +1238,15 @@ function sincronizarEditor() {
         fDest.className = 'fila';
         fDest.appendChild(sDest);
         gDest.appendChild(fDest);
+        const btnIr = document.createElement('button');
+        btnIr.className = 'btn';
+        btnIr.textContent = t('eIrA') + ': ' + (el.destino || '—');
+        btnIr.style.width = '100%';
+        btnIr.onclick = () => {
+            const destino = pestañas.find(p => p.nombre === el.destino);
+            if (destino) cambiarPestania(destino.id);
+        };
+        gDest.appendChild(btnIr);
         const nota = document.createElement('div');
         nota.className = 'nota';
         nota.textContent = t('eDestinoNota');
@@ -1165,6 +1320,7 @@ function sincronizarEditor() {
 function aplicarLive() {
     const node = document.querySelector('[data-id="' + seleccionId + '"]');
     if (node) aplicarEstilos(node, elementos.get(seleccionId), true);
+    marcarCambio();
 }
 
 function accionEditor(accion) {
@@ -1187,6 +1343,7 @@ function accionEditor(accion) {
         lista.splice(i, 1);
         eliminarSubarbol(id);
         seleccionId = null;
+        cerrarEditor();
     }
     renderLienzo();
     if (seleccionId) setSeleccion(seleccionId);
@@ -1227,12 +1384,14 @@ function duplicar(id) {
 /* ============================================================
    GUARDAR / CARGAR PROYECTO
    ============================================================ */
-function guardarProyecto() {
-    const datos = {
+function datosProyecto() {
+    return {
         tipo: 'PromptBlueprint proyecto',
         version: VERSION,
         idioma,
         tema,
+        modoClaro,
+        columnas: COLUMNAS,
         modo,
         paleta,
         pestañaActiva,
@@ -1242,8 +1401,22 @@ function guardarProyecto() {
         })),
         elementos: Array.from(elementos.values())
     };
-    descargarBlob(JSON.stringify(datos, null, 2), 'PromptBlueprint_proyecto.json', 'application/json');
+}
+
+function guardarProyecto() {
+    descargarBlob(JSON.stringify(datosProyecto(), null, 2), 'PromptBlueprint_proyecto.json', 'application/json');
     toast(t('guardado'));
+}
+
+/* Autoguardado en localStorage */
+function guardarEstado() {
+    try {
+        localStorage.setItem('pb_proyecto', JSON.stringify(datosProyecto()));
+    } catch (e) { /* almacenamiento lleno o no disponible */ }
+}
+function marcarCambio() {
+    clearTimeout(marcarCambio._t);
+    marcarCambio._t = setTimeout(guardarEstado, 600);
 }
 
 function cargarProyecto(evento) {
@@ -1277,6 +1450,8 @@ function restaurarProyecto(datos) {
     paleta = datos.paleta || crearPaletaDefault();
     idioma = datos.idioma || 'es';
     tema = Object.assign({}, TEMA_DEFECTO, datos.tema || {});
+    modoClaro = !!datos.modoClaro;
+    if (datos.columnas && datos.columnas >= 4 && datos.columnas <= 24) COLUMNAS = datos.columnas;
     modo = datos.modo || 'cuadricula';
     seleccionId = null;
     aplicarTema();
@@ -1286,6 +1461,34 @@ function restaurarProyecto(datos) {
     renderLienzo();
     actualizarTopBar();
     if (!pestañas.length) nuevaPestania(t('pestaniaInicio'), true);
+}
+
+async function limpiarLienzo() {
+    const ok = await dialogoConfirmar(t('limpiarLienzoConfirm'));
+    if (!ok) return;
+    localStorage.removeItem('pb_proyecto');
+    elementos.clear();
+    contadorId = 1;
+    contadorSeccion = 0;
+    contadorPestania = 0;
+    COLUMNAS = 12;
+    modo = 'cuadricula';
+    seleccionId = null;
+    paleta = crearPaletaDefault();
+    tema = Object.assign({}, TEMA_DEFECTO);
+    modoClaro = false;
+    idioma = 'es';
+    const idInicial = 'tab_' + (++contadorPestania);
+    pestañas = [{ id: idInicial, nombre: t('pestaniaInicio'), ancho: 1280, alto: 720, fondo: '#ffffff', raices: [], zoom: 1 }];
+    pestañaActiva = idInicial;
+    aplicarTema();
+    aplicarIdioma();
+    renderPestanas();
+    renderPaleta();
+    renderLienzo();
+    actualizarTopBar();
+    cerrarEditor();
+    toast(t('limpiarLienzoHecho'));
 }
 
 function descargarBlob(texto, nombre, tipo) {
@@ -1305,7 +1508,7 @@ function instruccionesIA() {
         return [
             'Analyze this JSON document to build the website described in "paginas".',
             '"paginas" is a list of site sections/pages. Each page has "nombre" (name), "lienzo" (width, height, background) and "elementos" (elements).',
-            '"modo" tells how the elements of each canvas are organized: "cuadricula" (12 columns) or "libre" (exact x/y positions).',
+            '"modo" tells how the elements of each canvas are organized: "cuadricula" (using "columnas") or "libre" (exact x/y positions).',
             'Each element has: id, tipo, etiqueta, nombre, texto, posicion, dimensiones, estilos and optionally animacion.',
             '"subsecciones" are elements nested inside a container (menu with submenus). Keep them as nested containers.',
             'When an element has "navegacion.destino", clicking it must go to the page whose "nombre" matches that value.',
@@ -1315,7 +1518,7 @@ function instruccionesIA() {
     return [
         'Analiza este documento JSON para construir la web descrita en "paginas".',
         '"paginas" es una lista de secciones/páginas del sitio. Cada página tiene "nombre", "lienzo" (ancho, alto, fondo) y "elementos".',
-        '"modo" indica cómo se organizan los elementos de cada lienzo: "cuadricula" (12 columnas) o "libre" (posiciones x/y exactas).',
+            '"modo" indica cómo se organizan los elementos de cada lienzo: "cuadricula" (usando "columnas") o "libre" (posiciones x/y exactas).',
         'Cada elemento tiene: id, tipo, etiqueta, nombre, texto, posicion, dimensiones, estilos y (opcional) animacion.',
         '"subsecciones" son elementos anidados dentro de un contenedor (menú con submenús). Respétalos como contenedores anidados.',
         'Cuando un elemento tenga "navegacion.destino", al pulsarlo debe llevar a la página cuyo "nombre" coincida con ese valor.',
@@ -1336,6 +1539,7 @@ function exportar() {
         version: VERSION,
         descripcion: 'Diseño exportado desde PromptBlueprint para que una IA construya la interfaz web.',
         modo,
+        columnas: COLUMNAS,
         instrucciones_para_la_ia: instruccionesIA(),
         paginas
     };
@@ -1361,8 +1565,8 @@ function jsonElemento(id) {
             : { spanCol: el.spanCol, spanRow: el.spanRow }
     };
     base.estilos = {
-        color: el.estilos.color,
-        fondo: el.estilos.fondo,
+        color: el.estilos.sincolorTexto ? null : el.estilos.color,
+        fondo: (el.estilos.sincolor || el.estilos.fondo === 'transparent') ? null : el.estilos.fondo,
         borde: el.estilos.borde,
         bordeColor: el.estilos.bordeColor,
         radio: el.estilos.radio,
@@ -1422,6 +1626,7 @@ function renderAjustes() {
     const opciones = [
         ['apariencia', t('aApariencia')],
         ['idioma', t('aIdioma')],
+        ['ayuda', t('aAyuda')],
         ['acerca', t('aAcercaDe')]
     ];
     opciones.forEach(o => {
@@ -1436,10 +1641,87 @@ function renderAjustes() {
     panel.innerHTML = '';
     if (ajustesSeccionActiva === 'apariencia') renderAjustesApariencia(panel);
     else if (ajustesSeccionActiva === 'idioma') renderAjustesIdioma(panel);
+    else if (ajustesSeccionActiva === 'ayuda') renderAjustesAyuda(panel);
     else renderAjustesAcerca(panel);
 }
 
 function renderAjustesApariencia(panel) {
+    // Modo claro / oscuro
+    const gModo = document.createElement('div');
+    gModo.className = 'grupo';
+    const hModo = document.createElement('h4');
+    hModo.textContent = t('aModoApariencia');
+    gModo.appendChild(hModo);
+    const modoBtns = document.createElement('div');
+    modoBtns.className = 'modo-btns';
+    const bOsc = document.createElement('button');
+    bOsc.className = 'btn' + (!modoClaro ? ' activo' : '');
+    bOsc.textContent = t('aModoOscuro');
+    bOsc.onclick = () => aplicarModoApariencia(false);
+    const bClr = document.createElement('button');
+    bClr.className = 'btn' + (modoClaro ? ' activo' : '');
+    bClr.textContent = t('aModoClaro');
+    bClr.onclick = () => aplicarModoApariencia(true);
+    modoBtns.appendChild(bOsc);
+    modoBtns.appendChild(bClr);
+    gModo.appendChild(modoBtns);
+    panel.appendChild(gModo);
+
+    // Presets de color
+    const gPre = document.createElement('div');
+    gPre.className = 'grupo';
+    const hPre = document.createElement('h4');
+    hPre.textContent = t('aPresets');
+    gPre.appendChild(hPre);
+    const notaPre = document.createElement('div');
+    notaPre.className = 'nota';
+    notaPre.textContent = t('aPresetsNota');
+    gPre.appendChild(notaPre);
+    const chips = document.createElement('div');
+    chips.className = 'preset-chips';
+    PRESETS.forEach((pres, idx) => {
+        const c = document.createElement('div');
+        c.className = 'preset-chip';
+        c.title = pres.nombre;
+        c.style.background = 'linear-gradient(135deg, ' + pres.colores.panel + ' 0%, ' + pres.colores.panel2 + ' 100%)';
+        c.style.borderLeft = '4px solid ' + pres.colores.acento;
+        c.onclick = () => aplicarPreset(pres.colores);
+        chips.appendChild(c);
+    });
+    gPre.appendChild(chips);
+    panel.appendChild(gPre);
+
+    // Columnas de la cuadrícula
+    const gCol = document.createElement('div');
+    gCol.className = 'grupo';
+    const hCol = document.createElement('h4');
+    hCol.textContent = t('aColumnas');
+    gCol.appendChild(hCol);
+    const notaCol = document.createElement('div');
+    notaCol.className = 'nota';
+    notaCol.textContent = t('aColumnasNota');
+    gCol.appendChild(notaCol);
+    const colFila = document.createElement('div');
+    colFila.className = 'fila';
+    const inpCol = document.createElement('input');
+    inpCol.type = 'number';
+    inpCol.min = 4;
+    inpCol.max = 24;
+    inpCol.value = COLUMNAS;
+    const lblCol = document.createElement('label');
+    lblCol.textContent = COLUMNAS + ' col';
+    inpCol.onchange = () => {
+        const v = clamp(parseInt(inpCol.value) || 12, 4, 24);
+        COLUMNAS = v;
+        lblCol.textContent = v + ' col';
+        renderLienzo();
+    };
+    colFila.appendChild(inpCol);
+    colFila.appendChild(lblCol);
+    gCol.appendChild(colFila);
+    panel.appendChild(gCol);
+
+    // Colores de la interfaz
     const g = document.createElement('div');
     g.className = 'grupo';
     const h = document.createElement('h4');
@@ -1481,11 +1763,26 @@ function renderAjustesApariencia(panel) {
     btn.textContent = t('aRestablecer');
     btn.addEventListener('click', () => {
         tema = Object.assign({}, TEMA_DEFECTO);
+        modoClaro = false;
         aplicarTema();
         renderAjustes();
     });
     g.appendChild(btn);
     panel.appendChild(g);
+}
+
+function aplicarModoApariencia(claro) {
+    modoClaro = claro;
+    tema = Object.assign({}, claro ? TEMA_CLARO : TEMA_OSCURO);
+    aplicarTema();
+    renderAjustes();
+}
+
+function aplicarPreset(colores) {
+    tema = Object.assign({}, colores);
+    modoClaro = colores.fondo === TEMA_CLARO.fondo;
+    aplicarTema();
+    renderAjustes();
 }
 
 function renderAjustesIdioma(panel) {
@@ -1507,13 +1804,26 @@ function renderAjustesIdioma(panel) {
     panel.appendChild(g);
 }
 
+function renderAjustesAyuda(panel) {
+    const g = document.createElement('div');
+    g.className = 'grupo';
+    const h = document.createElement('h4');
+    h.textContent = t('aAyudaTitulo');
+    g.appendChild(h);
+    const faq = document.createElement('div');
+    faq.className = 'faq-lista';
+    construirFaq(faq);
+    g.appendChild(faq);
+    panel.appendChild(g);
+}
+
 function renderAjustesAcerca(panel) {
     const g = document.createElement('div');
     g.className = 'grupo';
     const items = [
-        ['Version', tFmt('aVersion', { v: VERSION })],
-        ['Desarrollado por', t('aDesarrollado')],
-        ['Plataforma', t('aPlataforma')]
+        [t('aVersionLabel'), VERSION],
+        [t('aDesarrolladoLabel'), t('aDesarrollado')],
+        [t('aPlataformaLabel'), t('aPlataforma')]
     ];
     items.forEach(it => {
         const fila = document.createElement('div');
@@ -1533,9 +1843,7 @@ function renderAjustesAcerca(panel) {
 /* ============================================================
    FAQ
    ============================================================ */
-function renderFaq() {
-    const cuerpo = document.getElementById('faq-cuerpo');
-    cuerpo.innerHTML = '';
+function construirFaq(contenedor) {
     (I18N[idioma].faq || []).forEach((p, i) => {
         const item = document.createElement('div');
         item.className = 'faq-item';
@@ -1543,8 +1851,14 @@ function renderFaq() {
             '<div class="faq-pregunta"><span class="num">' + (i + 1) + '</span><span>' + esc(p[0]) + '</span></div>' +
             '<div class="faq-respuesta">' + esc(p[1]) + '</div>';
         item.querySelector('.faq-pregunta').addEventListener('click', () => item.classList.toggle('abierto'));
-        cuerpo.appendChild(item);
+        contenedor.appendChild(item);
     });
+}
+
+function renderFaq() {
+    const cuerpo = document.getElementById('faq-cuerpo');
+    cuerpo.innerHTML = '';
+    construirFaq(cuerpo);
 }
 
 function toggleFaq() {
@@ -1571,6 +1885,15 @@ function init() {
     actualizarTopBar();
     renderFaq();
     iniciarEventos();
+
+    // Restaurar autoguardado
+    try {
+        const guardado = localStorage.getItem('pb_proyecto');
+        if (guardado) {
+            const datos = JSON.parse(guardado);
+            if (datos && datos.tipo === 'PromptBlueprint proyecto') restaurarProyecto(datos);
+        }
+    } catch (e) { /* ignorar */ }
 }
 
 init();

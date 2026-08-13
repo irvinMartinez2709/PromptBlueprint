@@ -1,7 +1,7 @@
 /* ============================================================
    PROMPTBLUEPRINT — Registro de tipos de elementos
    ============================================================ */
-const COLUMNAS = 12;
+let COLUMNAS = 12;
 const GAP = 8;
 const ALTO_FILA = 56;
 

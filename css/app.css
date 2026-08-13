@@ -228,8 +228,71 @@ body {
     background: var(--panel2); flex-shrink: 0;
 }
 #editor-acciones .btn { flex: 1; min-width: 56px; text-align: center; font-size: 11.5px; }
-.cerrar-editor { background: none; border: none; color: var(--texto-suave); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px; border-radius: 4px; }
-.cerrar-editor:hover { color: #fff; background: var(--peligro); }
+/* ===== Controles de ventana (minimizar / cerrar) ===== */
+.ventana-controles { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.ventana-controles .vc {
+    width: 16px; height: 16px; border-radius: 50%; border: none; cursor: pointer; font-size: 9px;
+    line-height: 1; display: flex; align-items: center; justify-content: center; color: rgba(0,0,0,.65);
+    font-weight: 700; padding: 0;
+}
+.ventana-controles .vc.minimizar { background: #f5b83d; }
+.ventana-controles .vc.cerrar { background: #f2504a; }
+.ventana-controles .vc:hover { filter: brightness(1.15); }
+.ventana-controles .vc.minimizar::before { content: '—'; }
+.ventana-controles .vc.cerrar::before { content: '✕'; }
+
+#editor-cabecera, #faq-cabecera, #modal-cabecera {
+    display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--borde);
+    background: var(--panel2); flex-shrink: 0;
+}
+#editor-cabecera { padding: 8px 12px; }
+#faq-cabecera { padding: 10px 13px; }
+#modal-cabecera { padding: 12px 15px; }
+#editor-cabecera h4, #faq-cabecera h4 { flex: 1; font-size: 13px; }
+#modal-cabecera h3 { flex: 1; font-size: 14px; }
+
+/* Estado minimizado */
+#panel-editor.minimizado #editor-cuerpo,
+#panel-editor.minimizado #editor-acciones,
+#panel-faq.minimizado #faq-cuerpo,
+#modal-ajustes.minimizado #ajustes-nav,
+#modal-ajustes.minimizado #ajustes-panel { display: none; }
+#panel-editor.minimizado { height: auto; }
+#panel-faq.minimizado { height: auto; }
+#modal-ajustes.minimizado .modal-caja { min-height: 0; }
+
+/* ===== Diálogo propio ===== */
+.dialogo-caja { width: 380px; }
+#dialogo-cuerpo { padding: 16px 15px; display: flex; flex-direction: column; gap: 12px; }
+#dialogo-mensaje { font-size: 13.5px; line-height: 1.5; color: var(--texto); white-space: pre-line; }
+#dialogo-input {
+    background: var(--fondo); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px;
+    padding: 8px 10px; font-size: 13px; width: 100%; outline: none;
+}
+#dialogo-input:focus { border-color: var(--acento); }
+#modal-dialogo #modal-acciones { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ===== Mango de redimensionado libre de elementos ===== */
+.mango-el {
+    position: absolute; right: -9px; bottom: -9px; width: 18px; height: 18px; cursor: nwse-resize;
+    z-index: 51; background: var(--acento); border-radius: 3px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+}
+.elemento-web.seleccionado .mango-el { display: block; }
+.mango-el { display: none; }
+
+/* ===== Presets de color en ajustes ===== */
+.preset-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.preset-chip {
+    width: 52px; height: 34px; border-radius: 8px; border: 2px solid var(--borde); cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); transition: transform .12s, border-color .12s;
+}
+.preset-chip:hover { transform: scale(1.08); border-color: var(--acento); }
+.preset-chip.activo { border-color: var(--acento); outline: 2px solid var(--acento); }
+
+/* ===== Selector de modo claro/oscuro ===== */
+.modo-btns { display: flex; gap: 8px; }
+.modo-btns .btn { flex: 1; }
+.modo-btns .btn.activo { background: var(--acento); border-color: var(--acento); color: #fff; }
 
 /* ===== Popover añadir elemento ===== */
 #popover {
@@ -305,6 +368,11 @@ body {
 #ajustes-panel .acerca-item { display: flex; gap: 10px; align-items: baseline; font-size: 13.5px; }
 #ajustes-panel .acerca-item .k { color: var(--texto-suave); min-width: 130px; }
 #ajustes-panel .nota { font-size: 11.5px; color: var(--texto-suave); font-style: italic; }
+#ajustes-panel .faq-lista { display: flex; flex-direction: column; gap: 4px; }
+#ajustes-panel input[type=number] {
+    background: var(--fondo); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px;
+    padding: 7px 9px; font-size: 13px; width: 90px;
+}
 
 /* ===== Mensaje flotante ===== */
 #toast {
